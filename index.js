@@ -12,9 +12,13 @@ import methodPatProcess from './methods/pat-process.js';
 import methodPayment from './methods/payments.js';
 import methodStockMovements from './methods/stock-movments.js';
 import methodVaccine from './methods/vaccine.js';
+import dotenv from 'dotenv';
+import path from 'path';
+
+dotenv.config({ path: path.resolve('../.env') }); // gerekirse './.env' de olabilir
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3002; 
 
 app.use(cors()); // CORS middleware'ini kullanın
 app.use(express.json()); // JSON parselleme
