@@ -14,6 +14,7 @@ import methodStockMovements from './methods/stock-movments.js';
 import methodVaccine from './methods/vaccine.js';
 import dotenv from 'dotenv';
 import path from 'path';
+import bodyParser from 'body-parser';
 
 dotenv.config({ path: path.resolve('../.env') }); // gerekirse './.env' de olabilir
 
