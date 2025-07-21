@@ -1,12 +1,17 @@
+import dotenv from 'dotenv';
+import path from 'path';
 import knex from 'knex';
+
+dotenv.config({ path: path.resolve('../.env') }); // Eğer .env api klasöründe değilse
 
 const connection = knex({
   client: 'mysql',
   connection: {
-    host: '127.0.0.1',
-    user: 'root',
-    password: '',
-    database: 'appointment'
+    host: process.env.MYSQLHOST,
+    user: process.env.MYSQLUSER,
+    password: process.env.MYSQLPASSWORD,
+    database: process.env.MYSQLDATABASE,
+    port: process.env.MYSQLPORT
   },
   migrations: {
     tableName: 'migrations',

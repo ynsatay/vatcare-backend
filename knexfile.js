@@ -1,27 +1,24 @@
-// Update with your config settings.
+import dotenv from 'dotenv';
+import path from 'path';
 
-/**
- * @type { Object.<string, import("knex").Knex.Config> }
- */
+dotenv.config({ path: path.resolve('../.env') }); // gerekirse './.env' de olabilir
+
 export default {
-  
-    development: {
-      client: 'mysql',
-      connection: {
-        host : '127.0.0.1',
-        user : 'root',
-        password : '',
-        database : 'appointment'
-      },
-      migrations: {
-        tableName: 'migrations',
-        directory: './migrations'
-      },
-      seeds: {
-        directory: './seeds'
-      }
+  development: {
+    client: 'mysql',
+    connection: {
+      host: process.env.MYSQLHOST,
+      user: process.env.MYSQLUSER,
+      password: process.env.MYSQLPASSWORD,
+      database: process.env.MYSQLDATABASE,
+      port: process.env.MYSQLPORT
+    },
+    migrations: {
+      tableName: 'migrations',
+      directory: './migrations'
+    },
+    seeds: {
+      directory: './seeds'
     }
-  
-  };
-  
-  
+  }
+};
