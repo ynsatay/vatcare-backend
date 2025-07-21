@@ -14,6 +14,8 @@
     "react-icons": "^5.2.1"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "migrate": "knex migrate:latest --env development",
+    "seed": "knex seed:run --env development"
   }
 }
