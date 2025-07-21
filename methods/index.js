@@ -8,6 +8,11 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 function methods(app) {
+
+   app.get('/api/isLive'), (req, res) => {
+       return res.status(200).json({ status: 'success' });
+   } 
+
     //Giriş İşlemleri
     app.post('/api/login', (req, res) => {
         const { username, password } = req.body;
