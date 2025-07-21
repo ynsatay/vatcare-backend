@@ -30,20 +30,18 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/api/test', (req, res) => res.send('Hello World!'));
-
-methods(app); // API metotlarını ekleyin
-// methodsanimals(app);
-// methodsoffices(app);
-// methodpersonal(app);
-// methodsclinic(app);
-// MethodPersoneSearch(app);
-// methodappointment(app);
-// methodProcess(app);
-// methodPatProcess(app);
-// methodPayment(app);
-// methodStockMovements(app);
-// methodVaccine(app);
+methods(app); 
+methodsanimals(app);
+methodsoffices(app);
+methodpersonal(app);
+methodsclinic(app);
+MethodPersoneSearch(app);
+methodappointment(app);
+methodProcess(app);
+methodPatProcess(app);
+methodPayment(app);
+methodStockMovements(app);
+methodVaccine(app);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
