@@ -5,7 +5,7 @@ dotenv.config({ path: path.resolve('../.env') }); // gerekirse './.env' de olabi
 
 export default {
   development: {
-    client: 'mysql',
+    client: 'mysql2',
     connection: {
       host: process.env.MYSQLHOST,
       user: process.env.MYSQLUSER,

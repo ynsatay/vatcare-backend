@@ -5,7 +5,7 @@ import knex from 'knex';
 dotenv.config({ path: path.resolve('../.env') }); // Eğer .env api klasöründe değilse
 
 const connection = knex({
-  client: 'mysql',
+  client: 'mysql2',
   connection: {
     host: process.env.MYSQLHOST,
     user: process.env.MYSQLUSER,
