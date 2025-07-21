@@ -18,7 +18,7 @@ import path from 'path';
 dotenv.config({ path: path.resolve('../.env') }); // gerekirse './.env' de olabilir
 
 const app = express();
-const port = process.env.PORT || 3002; 
+const port = process.env.PORT;
 
 app.use(cors()); // CORS middleware'ini kullanın
 app.use(express.json()); // JSON parselleme
