@@ -20,7 +20,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // Her gün saat 18:33'te çalışır (cron ifaden doğruysa)
-cron.schedule('40 18 * * *', async () => {
+cron.schedule('43 18 * * *', async () => {
   try {
     const reminders = await db('vaccination_plan as vp')
       .join('materials as m', 'vp.m_id', 'm.id')
