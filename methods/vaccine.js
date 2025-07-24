@@ -143,7 +143,7 @@ function methodVaccine(app) {
             });
         } catch (err) {
             console.error("Hızlı aşı planlama hatası:", err);
-            res.status(500).json({ error: "Sunucu hatası" });
+            res.status(500).json({ error: "Sunucu hatası", err });
         }
     });
 
