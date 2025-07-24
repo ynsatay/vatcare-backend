@@ -20,7 +20,7 @@ import './services/mailReminder.js';
 dotenv.config({ path: path.resolve('../.env') }); // gerekirse './.env' de olabilir
 
 const app = express();
-const port = process.env.MYSQLPORT;
+const port = process.env.PORT;
 
 app.use(cors({ origin: "*"}));
 
