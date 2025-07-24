@@ -19,15 +19,19 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
 // Her gün saat 18:33'te çalışır (cron ifaden doğruysa)
-cron.schedule('43 18 * * *', async () => {
+cron.schedule('52 18 * * *', async () => {
   try {
     const reminders = await db('vaccination_plan as vp')
       .join('materials as m', 'vp.m_id', 'm.id')
       .join('users_animals as ua', 'vp.animal_id', 'ua.id')
       .join('users as u', 'ua.user_id', 'u.id')
       .select('vp.planned_date', 'm.name as vaccine_name', 'u.email as owner_email')
-      .where('vp.planned_date', '=', db.raw("CURRENT_DATE + INTERVAL 1 DAY"));
+      .whereRaw('DATE(vp.planned_date) = ?', [tomorrowStr]);
 
     let sentCount = 0;
 
@@ -42,7 +46,7 @@ cron.schedule('43 18 * * *', async () => {
         console.log(`Mail gönderildi: ${info.response} - Alıcı: ${r.owner_email}`);
         sentCount++;
       } catch (mailErr) {
-        console.error(`Mail gönderme hatası (alıcı: ${r.owner_email}):`, mailErr);
+        console.error(`Mail gönderme hatası (alıcı: ${r.owner_email}):`, mailErr, process.env.EMAIL_USER, process.env.EMAIL_PASS);
       }
     }
 
