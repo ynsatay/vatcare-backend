@@ -3,7 +3,7 @@ import cron from 'node-cron';
 import db from '../knex/connection.js'; // senin knex bağlantın
 import { sendMail } from '../methods/utils/mailer.js';
 
-cron.schedule('20 17 * * *', async () => {
+cron.schedule('0 6 * * *', async () => {
   console.log('Cron job başladı - Mail gönderiliyor');
 
   try {
