@@ -43,7 +43,7 @@ function methodappointment(app) {
             res.status(200).json({ status: 'success', message: 'Randevu başarıyla eklendi.' });
         } catch (err) {
             console.error(err);
-            res.status(500).json({ error: 'Sunucu hatası', status: 'error' });
+            res.status(500).json({ error: 'Sunucu hatası', status: 'error', err });
         }
     });
 
