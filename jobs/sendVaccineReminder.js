@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import nodemailer from 'nodemailer';
-import db from '../api/knex/connection.js'; // ✅ backend içinde kaldı
+import db from '../knex/connection.js'; 
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
