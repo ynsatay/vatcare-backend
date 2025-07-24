@@ -15,6 +15,7 @@ import methodVaccine from './methods/vaccine.js';
 import dotenv from 'dotenv';
 import path from 'path';
 import bodyParser from 'body-parser';
+import './jobs/sendVaccineReminder.js';
 
 dotenv.config({ path: path.resolve('../.env') }); // gerekirse './.env' de olabilir
 
