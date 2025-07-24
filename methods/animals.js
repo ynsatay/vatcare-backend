@@ -105,68 +105,79 @@ function methodsanimals(app) {
         }
     });
 
-    app.post('/api/animalpost', authenticateToken, async (req, res) => {
-        try {
-            console.log("Gelen body:", req.body);
+    try {
+        console.log("Gelen body:", req.body);
 
-            let {
-                user_id,
-                animal_id,
-                animal_species_id,
-                birthdate,
-                deathdate,
-                animalidentnumber,
-                picture,
-                isdeath,
-                animalname
-            } = req.body;
+        let {
+            user_id,
+            animal_id,
+            animal_species_id,
+            birthdate,
+            deathdate,
+            animalidentnumber,
+            picture,
+            isdeath,
+            animalname
+        } = req.body;
 
-            // Boşsa rastgele 6 haneli sayı üret
-            if (!animalidentnumber) {
-                animalidentnumber = Math.floor(100000 + Math.random() * 900000).toString();
-                console.log("Otomatik üretilen animalidentnumber:", animalidentnumber);
-            }
+        // Boşsa rastgele 6 haneli sayı üret
+        if (!animalidentnumber) {
+            animalidentnumber = Math.floor(100000 + Math.random() * 900000).toString();
+            console.log("Otomatik üretilen animalidentnumber:", animalidentnumber);
+        }
 
-            if (!user_id || !animal_id || !animal_species_id) {
-                return res.status(400).json({
-                    error: 'user_id, animal_id or animal_species_id is missing',
-                    status: 'error'
-                });
-            }
-
-            if (!animalname) {
-                console.warn('Hayvan adı eksik!');
-            }
-
-            await connection('users_animals').insert({
-                user_id,
-                animal_id,
-                animal_species_id,
-                birthdate,
-                deathdate,
-                animalidentnumber,
-                picture,
-                active: 1,
-                isdeath,
-                animalname
-            });
-
-            console.log("Hayvan adı veritabanına eklendi:", animalname);
-
-            return res.status(200).json({
-                status: 'success',
-                message: 'Kayıt işlemi tamamlandı.',
-                animalidentnumber: animalidentnumber // ister frontend'e döndür
-            });
-
-        } catch (error) {
-            console.error('Sunucu hatası:', error);
-            return res.status(500).json({
-                error: 'Server error',
+        if (!user_id || !animal_id || !animal_species_id) {
+            return res.status(400).json({
+                error: 'user_id, animal_id or animal_species_id is missing',
                 status: 'error'
             });
         }
-    });
+
+        if (!animalname) {
+            console.warn('Hayvan adı eksik!');
+        }
+
+        console.log("Veritabanına kayıt yapılacak veriler:", {
+            user_id,
+            animal_id,
+            animal_species_id,
+            birthdate,
+            deathdate,
+            animalidentnumber,
+            picture,
+            isdeath,
+            animalname
+        });
+
+        connection('users_animals').insert({
+            user_id,
+            animal_id,
+            animal_species_id,
+            birthdate,
+            deathdate,
+            animalidentnumber,
+            picture,
+            active: 1,
+            isdeath,
+            animalname
+        });
+
+        console.log("Hayvan adı veritabanına eklendi:", animalname);
+
+        return res.status(200).json({
+            status: 'success',
+            message: 'Kayıt işlemi tamamlandı.',
+            animalidentnumber: animalidentnumber
+        });
+
+    } catch (error) {
+        console.error('Sunucu hatası:', error);
+        return res.status(500).json({
+            error: 'Server error',
+            status: 'error'
+        });
+    }
+
 
 }
 
