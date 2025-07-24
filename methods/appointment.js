@@ -6,11 +6,19 @@ import { deleteFeedWithReference } from './utils/deleteFeed.js';
 function methodappointment(app) {
     app.post('/api/addappointment', authenticateToken, async (req, res) => {
         try {
-            const { user_animal_id, process_date, start_time, end_time, notes, status, app_type } = req.body;
+            let { user_animal_id, process_date, start_time, end_time, notes, status, app_type } = req.body;
 
             if (!user_animal_id || !process_date || !start_time || !end_time) {
                 return res.status(400).json({ error: 'Zorunlu alanları doldurunuz', status: 'error' });
             }
+
+            // Tarihleri MySQL formatına çevir
+            const formatDateTime = (dateTimeStr) =>
+                new Date(dateTimeStr).toISOString().slice(0, 19).replace("T", " ");
+
+            process_date = formatDateTime(process_date);
+            start_time = formatDateTime(start_time);
+            end_time = formatDateTime(end_time);
 
             // Randevu ekle
             const [insertedId] = await connection('appointment_process').insert({
@@ -20,7 +28,7 @@ function methodappointment(app) {
                 end_time,
                 notes: notes || null,
                 status: status || 0,
-                app_type: app_type || 0
+                app_type: app_type || 0,
             });
 
             // Kullanıcı ID'sini çek
@@ -37,7 +45,7 @@ function methodappointment(app) {
                 color: "success",
                 feed_date: new Date(),
                 reference_table: 'appointment_process',
-                reference_id: insertedId
+                reference_id: insertedId,
             });
 
             res.status(200).json({ status: 'success', message: 'Randevu başarıyla eklendi.' });
@@ -46,6 +54,7 @@ function methodappointment(app) {
             res.status(500).json({ error: 'Sunucu hatası', status: 'error', err });
         }
     });
+
 
 
     app.get('/api/getuseranimal', authenticateToken, (req, res) => {
