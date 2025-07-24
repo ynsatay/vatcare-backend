@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
-dotenv.config({ path: path.resolve('../.env') }); // gerekirse './.env' de olabilir
+dotenv.config({ path: path.resolve('../.env') }); // .env dosyasının proje kökünde olduğundan emin ol
 
 export default {
   development: {
@@ -11,14 +11,14 @@ export default {
       user: process.env.MYSQLUSER,
       password: process.env.MYSQLPASSWORD,
       database: process.env.MYSQLDATABASE,
-      port: process.env.MYSQLPORT
+      port: Number(process.env.MYSQLPORT) || 3306,
     },
     migrations: {
       tableName: 'migrations',
-      directory: './migrations'
+      directory: './migrations',
     },
     seeds: {
-      directory: './seeds'
-    }
-  }
+      directory: './seeds',
+    },
+  },
 };
