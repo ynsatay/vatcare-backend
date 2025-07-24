@@ -23,8 +23,7 @@ const tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
 const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
-// Her gün saat 18:33'te çalışır (cron ifaden doğruysa)
-cron.schedule('52 18 * * *', async () => {
+cron.schedule('59 18 * * *', async () => {
   try {
     const reminders = await db('vaccination_plan as vp')
       .join('materials as m', 'vp.m_id', 'm.id')
