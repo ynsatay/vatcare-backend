@@ -121,7 +121,15 @@ function methodsanimals(app) {
                 animalname
             } = req.body;
 
-            // Boşsa rastgele 6 haneli sayı üret
+            // Tip dönüşümü
+            user_id = Number(user_id);
+            animal_id = Number(animal_id);
+            animal_species_id = Number(animal_species_id);
+
+            // Tarih boşsa null yap
+            deathdate = deathdate || null;
+            picture = picture || null;
+
             if (!animalidentnumber) {
                 animalidentnumber = Math.floor(100000 + Math.random() * 900000).toString();
                 console.log("Otomatik üretilen animalidentnumber:", animalidentnumber);
@@ -137,6 +145,8 @@ function methodsanimals(app) {
             if (!animalname) {
                 console.warn('Hayvan adı eksik!');
             }
+
+            isdeath = deathdate ? 1 : 0;
 
             await connection('users_animals').insert({
                 user_id,
@@ -156,11 +166,12 @@ function methodsanimals(app) {
             return res.status(200).json({
                 status: 'success',
                 message: 'Kayıt işlemi tamamlandı.',
-                animalidentnumber: animalidentnumber // ister frontend'e döndür
+                animalidentnumber
             });
 
         } catch (error) {
             console.error('Sunucu hatası:', error);
+            if (error.sqlMessage) console.error('SQL Hatası:', error.sqlMessage);
             return res.status(500).json({
                 error: 'Server error',
                 status: 'error'
