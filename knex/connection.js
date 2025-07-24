@@ -1,8 +1,12 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import knex from 'knex';
+import { fileURLToPath } from 'url';
 
-dotenv.config({ path: path.resolve('../.env') }); // Eğer .env api klasöründe değilse
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const connection = knex({
   client: 'mysql2',
@@ -11,7 +15,7 @@ const connection = knex({
     user: process.env.MYSQLUSER,
     password: process.env.MYSQLPASSWORD,
     database: process.env.MYSQLDATABASE,
-    port: process.env.MYSQLPORT
+    port: Number(process.env.MYSQLPORT)
   },
   migrations: {
     tableName: 'migrations',

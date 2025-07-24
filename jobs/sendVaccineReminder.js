@@ -19,8 +19,8 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Her sabah 9'da çalışır
-cron.schedule('25 18 * * *', async () => {
+// Her gün saat 18:33'te çalışır (cron ifaden doğruysa)
+cron.schedule('40 18 * * *', async () => {
   try {
     const reminders = await db('vaccination_plan as vp')
       .join('materials as m', 'vp.m_id', 'm.id')
@@ -29,17 +29,25 @@ cron.schedule('25 18 * * *', async () => {
       .select('vp.planned_date', 'm.name as vaccine_name', 'u.email as owner_email')
       .where('vp.planned_date', '=', db.raw("CURRENT_DATE + INTERVAL 1 DAY"));
 
+    let sentCount = 0;
+
     for (const r of reminders) {
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: r.owner_email,
-        subject: 'Aşı Hatırlatma',
-        text: `${r.planned_date.toISOString().split('T')[0]} tarihine ${r.vaccine_name} aşısı planlanmıştır.`
-      });
+      try {
+        const info = await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: r.owner_email,
+          subject: 'Aşı Hatırlatma',
+          text: `${r.planned_date.toISOString().split('T')[0]} tarihine ${r.vaccine_name} aşısı planlanmıştır.`
+        });
+        console.log(`Mail gönderildi: ${info.response} - Alıcı: ${r.owner_email}`);
+        sentCount++;
+      } catch (mailErr) {
+        console.error(`Mail gönderme hatası (alıcı: ${r.owner_email}):`, mailErr);
+      }
     }
 
-    console.log(`${reminders.length} hatırlatma maili gönderildi.`);
+    console.log(`${sentCount} adet hatırlatma maili gönderildi.`);
   } catch (err) {
-    console.error('Hatırlatma maili hatası:', err);
+    console.error('Hatırlatma maili genel hatası:', err);
   }
 });
