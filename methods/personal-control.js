@@ -12,7 +12,7 @@ function MethodPersoneSearch(app) {
             return res.status(400).json({ error: 'TC kimlik numarası gerekli', status: 'error' });
         }
 
-        connection('USERS')
+        connection('users')
             .where('identity', tc)
             .first()
             .then(user => {
@@ -77,7 +77,7 @@ function MethodPersoneSearch(app) {
             return res.status(400).json({ error: 'User ID gerekli', status: 'error' });
         }
 
-        connection('USERS')
+        connection('users')
             .where('id', user_id)
             .first()
             .then(user => {
