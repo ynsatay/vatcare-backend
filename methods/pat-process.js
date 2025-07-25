@@ -144,9 +144,19 @@ function methodPatProcess(app) {
                 return res.status(400).json({ message: 'Ödenmiş kayıt silinemez.' });
             }
 
+            // Aşı planına bağlı mı kontrol et
+            const linkedVaccine = await connection('vaccination_plan')
+                .where({ pp_id: id })
+                .first();
+
+            if (linkedVaccine) {
+                return res.status(400).json({
+                    message: 'Bu işlem bir aşı planına bağlı olduğundan silinemez.'
+                });
+            }
+
             // Materyalse işlem
             if (process.row_type === 'M') {
-                // Hareket kaydını bul
                 const movement = await connection('material_movements')
                     .where({
                         pp_id: process.id,
@@ -155,19 +165,16 @@ function methodPatProcess(app) {
                     .first();
 
                 if (movement) {
-                    // Stok geri yükleniyor
                     await connection('materials')
                         .where({ id: process.process_id })
                         .increment('quantity', movement.quantity);
 
-                    // Hareket kaydı siliniyor
                     await connection('material_movements')
                         .where({ id: movement.id })
                         .del();
                 }
             }
 
-            // Feed sil (jenerik)
             const feed = await connection('feeds')
                 .where({ reference_table: 'patient_process', reference_id: id })
                 .first();
@@ -176,7 +183,6 @@ function methodPatProcess(app) {
                 await deleteFeedWithReference(feed.id);
             }
 
-            // Hasta süreci kaydını sil
             await connection('patient_process').where({ id }).del();
 
             res.json({ message: 'Kayıt ve ilişkili işlemler başarıyla silindi.' });
@@ -185,8 +191,6 @@ function methodPatProcess(app) {
             res.status(500).json({ message: 'Silme sırasında hata oluştu', error });
         }
     });
-
-
 
     // 4️⃣ İşlem güncelleme
     app.put('/api/patient-process/:id', authenticateToken, async (req, res) => {
