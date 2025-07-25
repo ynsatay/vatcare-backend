@@ -237,7 +237,7 @@ function methodVaccine(app) {
     });
 
     //7. Aşı planının uygulanması
-    app.put('/api/vaccine/plan/:id', authenticateToken, async (req, res) => {
+    app.put('/api/vaccine/plan/:id/apply', authenticateToken, async (req, res) => {
         const { id } = req.params;
 
         try {
