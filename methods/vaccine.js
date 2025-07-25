@@ -64,7 +64,7 @@ function methodVaccine(app) {
                 .join('materials as m', 'vp.m_id', 'm.id')
                 .select(
                     'vp.id',
-                    'vp.planned_date',
+                    connection.raw("DATE_FORMAT(vp.planned_date, '%Y-%m-%d') as planned_date"),
                     'vp.notes',
                     'vp.animal_id',
                     'm.name as vaccine_name',
