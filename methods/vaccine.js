@@ -29,25 +29,23 @@ function methodVaccine(app) {
                 )
                 .whereBetween('vp.planned_date', [startDate, endDate]);
 
-            const events = [...planned];
-            // Uygulanan aşılardan seçilen tarih aralığındaki kayıtlar
-            // let applied = [];
-            // if (includeUnplannedBool) {
-            //     applied = await connection('vaccine_application as va')
-            //         .join('materials as m', 'va.m_id', 'm.id')
-            //         .join('users_animals as ua', 'vp.animal_id', 'ua.id')
-            //         .select(
-            //             'va.id',
-            //             connection.raw('va.applied_on as date'),
-            //             connection.raw(`'application' as type`),
-            //             'va.animal_id',
-            //             'm.name as vaccine_name',
-            //             'ua.animalname as animal_name'
-            //         )
-            //         .whereBetween('va.applied_on', [startDate, endDate]);
-            // }
+            let applied = [];
+            if (includeUnplannedBool) {
+                applied = await connection('vaccine_application as va')
+                    .join('materials as m', 'va.m_id', 'm.id')
+                    .join('users_animals as ua', 'va.animal_id', 'ua.id') // burada 'va.animal_id' olmalı, 'vp.animal_id' değil
+                    .select(
+                        'va.id',
+                        connection.raw('va.applied_on as date'),
+                        connection.raw(`'application' as type`),
+                        'va.animal_id',
+                        'm.name as vaccine_name',
+                        'ua.animalname as animal_name'
+                    )
+                    .whereBetween('va.applied_on', [startDate, endDate]);
+            }
 
-            // const events = [...planned, ...applied];
+            const events = [...planned, ...applied];
 
             res.json(events);
         } catch (error) {
@@ -55,6 +53,7 @@ function methodVaccine(app) {
             res.status(500).json({ error: 'Aşı takvimi getirilirken hata oluştu.' });
         }
     });
+
 
     //2. Hayvana ait uygulanmaya aşı planları 
     app.get('/api/vaccine/plans/unapplied/:animalId', authenticateToken, async (req, res) => {
