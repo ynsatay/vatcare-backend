@@ -150,7 +150,7 @@ function methodVaccine(app) {
     //5. aşı planı güncelleme
     app.put('/api/vaccine/plan/:id', authenticateToken, async (req, res) => {
         const { id } = req.params;
-        const { planned_date, m_id, notes } = req.body;
+        const { planned_date, notes } = req.body;
 
         try {
             const plan = await connection('vaccination_plan').where({ id }).first();
@@ -167,7 +167,6 @@ function methodVaccine(app) {
                 .where({ id })
                 .update({
                     planned_date,
-                    m_id,
                     notes
                 });
 
