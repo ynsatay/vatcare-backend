@@ -67,7 +67,8 @@ function methodVaccine(app) {
                     'vp.planned_date',
                     'vp.notes',
                     'vp.animal_id',
-                    'm.name as vaccine_name'
+                    'm.name as vaccine_name',
+                    'vp.m_id'
                 )
                 .where({ 'vp.animal_id': animalId, 'vp.is_applied': false })
                 .orderBy('vp.planned_date', 'asc');
