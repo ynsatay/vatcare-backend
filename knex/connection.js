@@ -10,7 +10,6 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const connection = knex({
   client: 'mysql2',
-  timezone: 'Z',
   connection: {
     host: process.env.MYSQLHOST,
     user: process.env.MYSQLUSER,
@@ -24,6 +23,13 @@ const connection = knex({
   },
   seeds: {
     directory: './seeds'
+  }
+  pool: {
+    afterCreate: (conn, done) => {
+      conn.query("SET time_zone = '+00:00';", (err) => {
+        done(err, conn);
+      });
+    }
   }
 });
 
