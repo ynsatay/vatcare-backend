@@ -99,7 +99,7 @@ function methodProcess(app) {
         //     return res.status(400).json({ error: 'Zorunlu alanlar eksik', status: 'error' });
         // }
 
-         if (!name || unit === undefined) {
+        if (!name || unit === undefined) {
             return res.status(400).json({ error: 'Zorunlu alanlar eksik', status: 'error' });
         }
 
@@ -129,6 +129,26 @@ function methodProcess(app) {
         } catch (error) {
             console.error('Güncelleme hatası:', error);
             return res.status(500).json({ status: 'error', message: 'Sunucu hatası' });
+        }
+    });
+
+    //Stok detay bilgileri.
+    app.get('/api/material/id/:id', async (req, res) => {
+        const { id } = req.params;
+
+        try {
+            const stockItem = await connection('stock_materials')
+                .where({ id })
+                .first();
+
+            if (!stockItem) {
+                return res.status(404).json({ message: 'Stok bulunamadı' });
+            }
+
+            res.json(stockItem);
+        } catch (error) {
+            console.error('Stok getirme hatası:', error);
+            res.status(500).json({ message: 'Sunucu hatası' });
         }
     });
 
