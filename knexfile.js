@@ -7,7 +7,6 @@ export default {
   development: {
     client: 'mysql2',
     timezone: 'Z',
-    dateStrings: true,
     connection: {
       host: process.env.MYSQLHOST,
       user: process.env.MYSQLUSER,
