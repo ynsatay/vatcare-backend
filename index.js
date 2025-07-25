@@ -16,6 +16,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import bodyParser from 'body-parser';
 import './services/mailReminder.js';
+import cookieParser from 'cookie-parser';
 
 dotenv.config({ path: path.resolve('../.env') }); // gerekirse './.env' de olabilir
 
@@ -30,6 +31,7 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 // JSON ve URL-encoded veri ayrıştırma middleware'leri
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 methods(app); 
 methodsanimals(app);
