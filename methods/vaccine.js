@@ -24,7 +24,8 @@ function methodVaccine(app) {
                     connection.raw(`'plan' as type`),
                     'vp.animal_id',
                     'm.name as vaccine_name',
-                    'ua.animalname as animal_name'
+                    'ua.animalname as animal_name',
+                    'vp.is_applied'
                 )
                 .whereBetween('vp.planned_date', [startDate, endDate]);
 
