@@ -10,7 +10,7 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const connection = knex({
   client: 'mysql2',
-  timezone: 'local',
+  timezone: '+03:00',
   connection: {
     host: process.env.MYSQLHOST,
     user: process.env.MYSQLUSER,
