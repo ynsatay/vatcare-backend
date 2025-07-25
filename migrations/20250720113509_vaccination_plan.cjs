@@ -9,9 +9,9 @@ exports.up = function(knex) {
       .references('id').inTable('users_animals').onDelete('CASCADE');
     table.integer('m_id').unsigned().notNullable()
       .references('id').inTable('materials').onDelete('CASCADE');
-    table.date('planned_date').notNullable();
+    table.timestamp('planned_date').notNullable();
     table.boolean('is_applied').defaultTo(false);
-    table.date('applied_on').nullable();
+    table.timestamp('applied_on').nullable();
     table.text('notes').nullable();
     table.integer('pp_id').unsigned();
     table.integer('created_by').unsigned()

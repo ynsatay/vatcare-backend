@@ -9,7 +9,7 @@ exports.up = function(knex) {
       .references('id').inTable('users_animals').onDelete('CASCADE');
     table.integer('m_id').unsigned().notNullable()
       .references('id').inTable('materials').onDelete('CASCADE');
-    table.date('applied_on').notNullable();
+    table.timestamp('applied_on').notNullable();
     table.integer('pa_id').unsigned().nullable()
       .references('id').inTable('patient_arrivals').onDelete('SET NULL');
     table.integer('plan_id').unsigned().nullable()

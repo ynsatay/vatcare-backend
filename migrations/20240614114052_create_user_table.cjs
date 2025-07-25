@@ -8,7 +8,7 @@ exports.up = function(knex) {
     table.string('phone').nullable();
     table.string('email').notNullable();
     table.string('sex').nullable();
-    table.date('birthdate').nullable();
+    table.timestamp('birthdate').nullable();
     table.string('role').notNullable(); //1: hasta, 2: Veteriner, 3: Klinik yöneticisi
     table.string('address').nullable();
     table.longtext('picture').nullable();

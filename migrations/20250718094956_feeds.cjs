@@ -12,7 +12,7 @@ exports.up = function(knex) {
     table.string("title", 500).notNullable();
     table.string("icon").defaultTo("bi bi-info-circle");
     table.string("color").defaultTo("primary");
-    table.date("feed_date").notNullable(); // işlemle ilgili tarih
+    table.timestamp("feed_date").notNullable(); // işlemle ilgili tarih
     table.string("reference_table").nullable();
     table.integer("reference_id").unsigned().nullable();
     table.timestamp("created_at").defaultTo(knex.fn.now()).notNullable();

@@ -10,7 +10,7 @@ exports.up = function(knex) {
     table.integer('quantity').notNullable().defaultTo(0); // Stok adedi
     table.integer('unit').notNullable(); // Miktar birimi (örnek: kutu, adet)
     table.integer('category'); // Kategori (örnek: İlaç, Sarf)
-    table.date('expiration_date'); // Son kullanma tarihi (isteğe bağlı)
+    table.timestamp('expiration_date'); // Son kullanma tarihi (isteğe bağlı)
     table.integer('min_stock_level').defaultTo(0); // Minimum stok seviyesi
     table.string('barcode'); // Varsa barkod bilgisi
     table.string('supplier_name'); // Tedarikçi bilgisi (isteğe bağlı)

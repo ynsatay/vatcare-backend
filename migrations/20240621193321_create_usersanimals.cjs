@@ -10,8 +10,8 @@ exports.up = function(knex) {
       table.integer('animal_species_id').notNullable();
       table.boolean('active').defaultTo(true);
       table.boolean('isdeath').defaultTo(false);     
-      table.date('birthdate').notNullable();
-      table.date('deathdate').nullable();
+      table.timestamp('birthdate').notNullable();
+      table.timestamp('deathdate').nullable();
       table.string('animalidentnumber');
       table.longtext('picture').nullable();
       table.string('animalname').nullable();
