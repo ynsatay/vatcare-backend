@@ -219,6 +219,27 @@ function methodPatProcess(app) {
         }
     });
 
+    //Geliş dosyasından animal_id getir
+    app.get('/api/patient-arrival/:id/animal', authenticateToken, async (req, res) => {
+        const { id } = req.params;
+
+        try {
+            const result = await connection('patient_arrivals')
+                .select('animal_id')
+                .where({ id })
+                .first();
+
+            if (!result) {
+                return res.status(404).json({ error: 'Geliş dosyası bulunamadı' });
+            }
+
+            res.json({ animal_id: result.animal_id });
+        } catch (error) {
+            console.error('Hayvan ID alınırken hata:', error);
+            res.status(500).json({ error: 'Hayvan ID alınırken sunucu hatası' });
+        }
+    });
+
 }
 
 export default methodPatProcess;

@@ -201,7 +201,7 @@ function methodVaccine(app) {
         }
     });
 
-    
+
     //6. Seçilen aşı planının detayını getirme
     app.get('/api/vaccine/plan/:id', authenticateToken, async (req, res) => {
         const { id } = req.params;
@@ -232,6 +232,29 @@ function methodVaccine(app) {
         } catch (error) {
             console.log(error);
             res.status(500).json({ error: 'Aşı planı getirilirken hata oluştu.' });
+        }
+    });
+
+    //7. Aşı planının uygulanması
+    app.put('/api/vaccine/plan/:id', authenticateToken, async (req, res) => {
+        const { id } = req.params;
+
+        try {
+            const updated = await connection('vaccination_plan')
+                .where({ id })
+                .update({
+                    is_applied: true,
+                    applied_on: new Date()
+                });
+
+            if (updated) {
+                res.json({ message: 'Aşı uygulandı olarak işaretlendi.' });
+            } else {
+                res.status(404).json({ error: 'Plan kaydı bulunamadı.' });
+            }
+        } catch (err) {
+            console.error("Güncelleme hatası:", err);
+            res.status(500).json({ error: 'Plan güncellenirken hata oluştu.' });
         }
     });
 
