@@ -218,8 +218,8 @@ function methodVaccine(app) {
                     'vp.notes',
                     'vp.is_applied',
                     'vp.animal_id',
-                    'm.animalname as vaccine_name',
-                    'ua.name as animal_name',
+                    'm.name as vaccine_name',
+                    'ua.animalname as animal_name',
                     connection.raw("CONCAT(u.name, ' ', u.surname) as owner_name")
                 )
                 .where('vp.id', id)
