@@ -23,7 +23,7 @@ const connection = knex({
   },
   seeds: {
     directory: './seeds'
-  }
+  },
   pool: {
     afterCreate: (conn, done) => {
       conn.query("SET time_zone = '+00:00';", (err) => {
