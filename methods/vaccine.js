@@ -28,7 +28,7 @@ function methodVaccine(app) {
                 )
                 .whereBetween('vp.planned_date', [startDate, endDate]);
 
-                const events = [...planned];
+            const events = [...planned];
             // Uygulanan aşılardan seçilen tarih aralığındaki kayıtlar
             // let applied = [];
             // if (includeUnplannedBool) {
@@ -202,6 +202,40 @@ function methodVaccine(app) {
         }
     });
 
+    
+    //6. Seçilen aşı planının detayını getirme
+    app.get('/api/vaccine/plan/:id', authenticateToken, async (req, res) => {
+        const { id } = req.params;
+
+        try {
+            const plan = await connection('vaccination_plan as vp')
+                .join('materials as m', 'vp.m_id', 'm.id')
+                .join('users_animals as ua', 'vp.animal_id', 'ua.id')
+                .join('users as u', 'ua.user_id', 'u.id')
+                .select(
+                    'vp.id',
+                    'vp.planned_date',
+                    'vp.notes',
+                    'vp.is_applied',
+                    'vp.animal_id',
+                    'm.name as vaccine_name',
+                    'ua.name as animal_name',
+                    connection.raw("CONCAT(u.name, ' ', u.surname) as owner_name")
+                )
+                .where('vp.id', id)
+                .first();
+
+            if (!plan) {
+                return res.status(404).json({ error: 'Aşı planı bulunamadı.' });
+            }
+
+            res.json(plan);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Aşı planı getirilirken hata oluştu.' });
+        }
+    });
+
     //EKSTRA - Aşıları getirir.
     app.get('/api/vaccine/materials', authenticateToken, async (req, res) => {
         try {
@@ -215,6 +249,7 @@ function methodVaccine(app) {
             return res.status(500).json({ error: 'Database error', status: 'error' });
         }
     });
+
 
 }
 
