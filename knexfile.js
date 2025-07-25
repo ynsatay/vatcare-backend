@@ -6,6 +6,7 @@ dotenv.config({ path: path.resolve('../.env') }); // .env dosyasının proje kö
 export default {
   development: {
     client: 'mysql2',
+    timezone: 'local',
     connection: {
       host: process.env.MYSQLHOST,
       user: process.env.MYSQLUSER,
