@@ -142,13 +142,13 @@ function methodProcess(app) {
                 .first();
 
             if (!stockItem) {
-                return res.status(404).json({ message: 'Stok bulunamadı' });
+                return res.status(404).json({ status: 'error', message: 'Stok bulunamadı' });
             }
 
-            res.json(stockItem);
+            res.json({ status: 'success', data: stockItem });
         } catch (error) {
             console.error('Stok getirme hatası:', error);
-            res.status(500).json({ message: 'Sunucu hatası' });
+            res.status(500).json({ status: 'error', message: 'Sunucu hatası' });
         }
     });
 
