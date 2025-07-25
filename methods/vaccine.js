@@ -239,13 +239,15 @@ function methodVaccine(app) {
     //7. Aşı planının uygulanması
     app.put('/api/vaccine/plan/:id/apply', authenticateToken, async (req, res) => {
         const { id } = req.params;
+        const { pp_id } = req.body;
 
         try {
             const updated = await connection('vaccination_plan')
                 .where({ id })
                 .update({
                     is_applied: true,
-                    applied_on: new Date()
+                    applied_on: new Date(),
+                    pp_id: pp_id || null
                 });
 
             if (updated) {
