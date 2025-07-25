@@ -12,18 +12,16 @@ function methodVaccine(app) {
         }
 
         try {
-            // Planlanan ve uygulanan aşılardan tarih aralığında olanları getir
             const plans = await connection('vaccination_plan as vp')
                 .join('materials as m', 'vp.m_id', 'm.id')
                 .join('users_animals as ua', 'vp.animal_id', 'ua.id')
                 .select(
                     'vp.id',
                     connection.raw(`CASE WHEN vp.is_applied = 0 THEN vp.planned_date ELSE vp.applied_on END as date`),
-                    connection.raw(`CASE WHEN vp.is_applied = 0 THEN 'plan' ELSE 'application' END as type`),
+                    'vp.is_applied',
                     'vp.animal_id',
                     'm.name as vaccine_name',
-                    'ua.animalname as animal_name',
-                    'vp.is_applied'
+                    'ua.animalname as animal_name'
                 )
                 .where(function () {
                     this.whereBetween('vp.planned_date', [startDate, endDate])
@@ -36,8 +34,6 @@ function methodVaccine(app) {
             res.status(500).json({ error: 'Aşı takvimi getirilirken hata oluştu.' });
         }
     });
-
-
 
     //2. Hayvana ait uygulanmaya aşı planları 
     app.get('/api/vaccine/plans/unapplied/:animalId', authenticateToken, async (req, res) => {
