@@ -27,28 +27,21 @@ function methods(app) {
                     return res.status(400).json({ error: 'Kullanıcı adı veya şifre hatalı', status: 'error' });
                 }
 
-                const token = jwt.sign({ username: username }, 'secret', { expiresIn: '24m' }); // Süreyi 24 saatten 24 dakikaya düşürdüm örnek
+                const token = jwt.sign({ username: username }, 'secret', { expiresIn: '24h' });
 
-                // Token'ı cookie olarak gönderiyoruz
-                res
-                    .cookie('token', token, {
-                        httpOnly: true,         // JS erişimine kapalı
-                        secure: true,           // Sadece HTTPS üzerinde gönderilir
-                        sameSite: 'strict',     // CSRF koruması
-                        maxAge: 24 * 60 * 60 * 1000, // 24 saat (isteğe göre kısaltılabilir)
-                    })
-                    .status(200)
-                    .json({
-                        status: 'success',
-                        message: 'Giriş başarılı',
-                        userid: user[0].id,
-                        username: user[0].uname,
-                        userRole: user[0].role
-                    });
+                var response = {
+                    status: 'success',
+                    message: 'Giriş başarılı',
+                    token: token,
+                    userid: user[0].id,
+                    username: user[0].uname,
+                    userRole: user[0].role
+                }
+
+                return res.status(200).json(response);
             });
         });
     });
-
 
     //Kayıt İşlemleri
     app.post('/api/register', (req, res) => {
