@@ -137,7 +137,7 @@ function methodProcess(app) {
         const { id } = req.params;
 
         try {
-            const stockItem = await connection('stock_materials')
+            const stockItem = await connection('materials')
                 .where({ id })
                 .first();
 
