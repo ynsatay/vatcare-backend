@@ -13,6 +13,7 @@ exports.up = function(knex) {
     table.boolean('is_applied').defaultTo(false);
     table.date('applied_on').nullable();
     table.text('notes').nullable();
+    table.integer('pp_id').unsigned();
     table.integer('created_by').unsigned()
       .references('id').inTable('users').onDelete('SET NULL');
     table.timestamp('created_at').defaultTo(knex.fn.now());
