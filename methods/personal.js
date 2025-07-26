@@ -138,9 +138,10 @@ function methodpersonal(app) {
             address,
             phone,
             birthdate,
-            sexuality,
-            role,
-            active
+            sex,       
+            identity,    
+            pass_number,  
+
         } = req.body;
 
         connection('users')
@@ -153,9 +154,9 @@ function methodpersonal(app) {
                 address,
                 phone,
                 birthdate,
-                sex: sexuality,
-                role,
-                active
+                sex,
+                identity,
+                pass_number
             })
             .then(() => {
                 res.status(200).json({ status: 'success', message: 'Personel bilgileri güncellendi.' });
