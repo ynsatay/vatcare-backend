@@ -259,12 +259,10 @@ function methodVaccine(app) {
 
     //EKSTRA - Aşıları getirir.
     app.get('/api/vaccine/materials', authenticateToken, async (req, res) => {
-        const off_id = req.user.off_id;
         try {
             const materials = await connection('materials')
                 .select('*')
                 .whereRaw("category = 5")
-                .andWhere('off_id', off_id);
 
             return res.status(200).json({
                 status: 'success',
