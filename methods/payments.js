@@ -63,6 +63,7 @@ function methodPayment(app) {
                 revenue_id: paymentId,
                 pp_id,
                 amount,
+                off_id
             }));
 
             await connection("patient_revenue_det").insert(detailRows);
