@@ -9,7 +9,7 @@ function methodsclinic(app) {
             const clinicList = await connection('clinic')
                 .select(
                     'clinic.*',
-                    'users.name as admin_name'
+                    connection.raw("CONCAT(users.name, ' ', users.surname) as admin_name")
                 )
                 .join('users', 'clinic.clinic_admin', 'users.id');
 
