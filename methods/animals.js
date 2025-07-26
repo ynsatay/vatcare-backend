@@ -90,10 +90,10 @@ function methodsanimals(app) {
                     animal_id: animal_id,
                     animal_species_id: animal_species_id,
                     birthdate: birthdate,
-                    deathdate: deathdate,
+                    deathdate: deathdate === "" ? null : deathdate,
                     animalidentnumber: animalidentnumber,
                     picture: picture,
-                    isdeath: isdeath,
+                    isdeath: isdeath === "" ? false : isdeath,
                     active: active,
                     animalname: animalname
                 });
