@@ -85,7 +85,8 @@ function methodPayment(app) {
                 color: "success",
                 feed_date: new Date(),
                 reference_table: 'patient_revenues',
-                reference_id: paymentId
+                reference_id: paymentId,
+                off_id : off_id
             });
 
             res.json({ message: "Tahsilat başarıyla eklendi", paymentId });
@@ -206,7 +207,8 @@ function methodPayment(app) {
                 color: "danger",
                 feed_date: new Date(),
                 reference_table: 'patient_revenues',
-                reference_id: id
+                reference_id: id,
+                off_id : off_id
             });
 
             await connection("patient_revenues").where({ id, off_id }).del();
