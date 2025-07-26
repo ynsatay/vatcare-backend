@@ -79,6 +79,7 @@ function methodappointment(app) {
             .join('users', 'users.id', 'users_animals.user_id')
             // .select('appointment_process.*', 'users_animals.name as animal_name', 'users.name as user_name')
             .select('appointment_process.*', 'users.name as user_name', 'users.id as user_id', 'users_animals.animalname as animal_name')
+            .orderBy('appointment_process.start_time', 'desc')
             .then((appointments) => {
                 if (appointments.length === 0) {
                     return res.status(404).json({ error: 'Randevu bulunamadı', status: 'error' });
