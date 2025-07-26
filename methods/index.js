@@ -315,22 +315,19 @@ function methods(app) {
     app.post('/api/sendDemoRequest', async (req, res) => {
         const { name, email, phone, message, plan } = req.body;
 
-        const mailContent = `
-                            <h3>Yeni Demo Talebi</h3>
-                            <p><strong>İsim:</strong> ${name}</p>
-                            <p><strong>Email:</strong> ${email}</p>
-                            <p><strong>Telefon:</strong> ${phone}</p>
-                            <p><strong>Mesaj:</strong> ${message}</p>
-                            <p><strong>Plan:</strong> ${plan}</p>
-                        `;
+
 
         try {
             await sendMail({
-                to: 'ynsatay3437@gmail.com',
-                subject: 'Yeni Demo Talebi',
-                text: '',
-                html: mailContent,
-            });
+                to: formData.email,
+                subject: 'Demo Talebi',
+                text: `İsim: ${formData.name}
+                       E-posta: ${formData.email}
+                       Telefon: ${formData.phone}
+                       Plan: ${selectedPlan}
+                       Mesaj: ${formData.message || '—'}
+                    `,
+                                });
 
             res.status(200).json({ message: 'Demo talebi gönderildi' });
         } catch (error) {
