@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import multer from 'multer';
 import authenticateToken from "./Middleware/index.js";
+import dotenv from 'dotenv';
+dotenv.config();
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -306,6 +308,40 @@ function methods(app) {
         }
     });
 
+
+    //mail apisi
+    app.post('/api/sendDemoRequest', async (req, res) => {
+        const { name, email, phone, message, plan } = req.body;
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'ynsatay3437@gmail.com',
+                pass: process.env.EMAIL_PASS,
+            },
+        });
+
+        const mailOptions = {
+            from: 'ynsatay3437@gmail.com',
+            to: 'ynsmratay@gmail.com',
+            subject: `Yeni Demo Talebi - ${plan}`,
+            html: `<h3>Yeni Demo / Plan Talebi</h3>
+                    <p><strong>Ad:</strong> ${name}</p>
+                    <p><strong>Email:</strong> ${email}</p>
+                    <p><strong>Telefon:</strong> ${phone}</p>
+                    <p><strong>Plan:</strong> ${plan}</p>
+                    <p><strong>Mesaj:</strong> ${message}</p>
+                    `,
+        };
+
+        try {
+            await transporter.sendMail(mailOptions);
+            res.json({ success: true });
+        } catch (error) {
+            console.error("Mail gönderme hatası:", error);
+            res.status(500).json({ success: false });
+        }
+    });
 
 }
 
