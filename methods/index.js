@@ -21,8 +21,10 @@ function methods(app) {
         }
 
         connection('users')
-            .where('uname', username)
-            .orWhere('email', username)
+            .where(function () {
+                this.where('uname', username).orWhere('email', username);
+            })
+            .andWhere('off_id', off_id)
             .first()
             .then((user) => {
                 if (!user) {
