@@ -5,6 +5,7 @@ import multer from 'multer';
 import authenticateToken from "./Middleware/index.js";
 import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
+import { sendMail } from '../methods/utils/mailer.js';
 dotenv.config();
 
 const storage = multer.memoryStorage();
@@ -314,33 +315,27 @@ function methods(app) {
     app.post('/api/sendDemoRequest', async (req, res) => {
         const { name, email, phone, message, plan } = req.body;
 
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: 'ynsatay3437@gmail.com',
-                pass: process.env.EMAIL_PASS,
-            },
-        });
-
-        const mailOptions = {
-            from: 'ynsatay3437@gmail.com',
-            to: 'ynsmratay@gmail.com',
-            subject: `Yeni Demo Talebi - ${plan}`,
-            html: `<h3>Yeni Demo / Plan Talebi</h3>
-                    <p><strong>Ad:</strong> ${name}</p>
-                    <p><strong>Email:</strong> ${email}</p>
-                    <p><strong>Telefon:</strong> ${phone}</p>
-                    <p><strong>Plan:</strong> ${plan}</p>
-                    <p><strong>Mesaj:</strong> ${message}</p>
-                    `,
-        };
+        const mailContent = `
+                            <h3>Yeni Demo Talebi</h3>
+                            <p><strong>İsim:</strong> ${name}</p>
+                            <p><strong>Email:</strong> ${email}</p>
+                            <p><strong>Telefon:</strong> ${phone}</p>
+                            <p><strong>Mesaj:</strong> ${message}</p>
+                            <p><strong>Plan:</strong> ${plan}</p>
+                        `;
 
         try {
-            await transporter.sendMail(mailOptions);
-            res.json({ success: true });
+            await sendMail({
+                to: 'ynsatay3437@gmail.com',
+                subject: 'Yeni Demo Talebi',
+                text: '',
+                html: mailContent,
+            });
+
+            res.status(200).json({ message: 'Demo talebi gönderildi' });
         } catch (error) {
-            console.error("Mail gönderme hatası:", error);
-            res.status(500).json({ success: false });
+            console.error('Mail gönderme hatası:', error);
+            res.status(500).json({ message: 'Mail gönderme başarısız' });
         }
     });
 
