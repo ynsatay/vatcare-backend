@@ -1,4 +1,3 @@
-
 import { response } from "express";
 import connection from "../knex/connection.js";
 import authenticateToken from './Middleware/index.js';
@@ -6,6 +5,7 @@ import authenticateToken from './Middleware/index.js';
 function MethodPersoneSearch(app) {
     // TC YE GORE KULLANICI SORGULAMA
     app.get('/api/getpersonelsearch', authenticateToken, (req, res) => {
+        const off_id = req.user.off_id; // off_id'yi token'dan aldık
         const { tc } = req.query;
 
         if (!tc) {
@@ -14,6 +14,7 @@ function MethodPersoneSearch(app) {
 
         connection('users')
             .where('identity', tc)
+            .andWhere('off_id', off_id) // off_id filtresi eklendi
             .first()
             .then(user => {
                 if (!user) {
@@ -28,6 +29,7 @@ function MethodPersoneSearch(app) {
     });
 
     app.get('/api/getanimalsearch', authenticateToken, async (req, res) => {
+        const off_id = req.user.off_id;
         const { tc } = req.query;
         const IsAnimalId = req.query.IsAnimalId;
 
@@ -48,12 +50,13 @@ function MethodPersoneSearch(app) {
                 .from('users_animals')
                 .join('animals', 'users_animals.animal_id', 'animals.id')
                 .join('animals_species', 'users_animals.animal_species_id', 'animals_species.id')
-                .join('users', 'users_animals.user_id', 'users.id');
+                .join('users', 'users_animals.user_id', 'users.id')
+                .where('users_animals.off_id', off_id); // off_id filtresi
 
             if (IsAnimalId == 1) {
-                query.where('users_animals.animalidentnumber', tc);
+                query.andWhere('users_animals.animalidentnumber', tc);
             } else {
-                query.where('users.identity', tc);
+                query.andWhere('users.identity', tc);
             }
 
             const data = await query;
@@ -71,6 +74,7 @@ function MethodPersoneSearch(app) {
 
 
     app.get('/api/getpersonelsearchuid', authenticateToken, (req, res) => {
+        const off_id = req.user.off_id;
         const { user_id } = req.query;
 
         if (!user_id) {
@@ -79,6 +83,7 @@ function MethodPersoneSearch(app) {
 
         connection('users')
             .where('id', user_id)
+            .andWhere('off_id', off_id) // off_id filtresi
             .first()
             .then(user => {
                 if (!user) {
@@ -91,7 +96,10 @@ function MethodPersoneSearch(app) {
                 res.status(500).json({ error: 'Sunucu hatası', status: 'error' });
             });
     });
+
+
     app.get('/api/getappointmentAnimal', authenticateToken, (req, res) => {
+        const off_id = req.user.off_id;
         const { tc } = req.query;
 
         if (!tc) {
@@ -109,6 +117,7 @@ function MethodPersoneSearch(app) {
                 'users_animals.animalidentnumber'
             )
             .where('users_animals.animalidentnumber', tc)
+            .andWhere('appointment_process.off_id', off_id) // off_id filtresi
             .then((appointments) => {
                 if (appointments.length === 0) {
                     return res.status(404).json({ error: 'Randevu bulunamadı', status: 'error' });
@@ -121,8 +130,11 @@ function MethodPersoneSearch(app) {
             });
     });
 
+
     app.post('/api/AddPatientfile', authenticateToken, (req, res) => {
         try {
+            const off_id = req.user.off_id;
+
             const {
                 u_id, animal_id, vet_u_id, type,
                 status, notes, is_discharge, arrival_reason, diagnosis,
@@ -139,7 +151,8 @@ function MethodPersoneSearch(app) {
                 is_discharge: is_discharge,
                 arrival_reason: arrival_reason,
                 diagnosis: diagnosis,
-                treatment_plan: treatment_plan
+                treatment_plan: treatment_plan,
+                off_id // off_id eklendi
             }).then((result) => {
                 const insertedId = result[0];
                 var response = {
@@ -161,6 +174,7 @@ function MethodPersoneSearch(app) {
     });
 
     app.get('/api/getPatientFileInfo', authenticateToken, (req, res) => {
+        const off_id = req.user.off_id;
         const { patFileId } = req.query;
 
         connection('patient_arrivals')
@@ -176,6 +190,7 @@ function MethodPersoneSearch(app) {
                 'animal.animalname AS animal_name'
             )
             .where('patient_arrivals.id', parseInt(patFileId))
+            .andWhere('patient_arrivals.off_id', off_id) // off_id filtresi
             .then((patFileInfo) => {
                 if (patFileInfo.length === 0) {
                     return res.status(404).json({ error: 'Geliş Dosyası Bulunamadı.', status: 'error' });
@@ -188,7 +203,8 @@ function MethodPersoneSearch(app) {
             });
     });
 
-    app.get('/api/arrivals', (req, res) => {
+    app.get('/api/arrivals', authenticateToken, (req, res) => {
+        const off_id = req.user.off_id;
         const { animalId } = req.query;
         if (isNaN(animalId)) {
             return res.status(400).json({ error: 'Geçersiz animal_id parametresi.', status: 'error' });
@@ -197,6 +213,7 @@ function MethodPersoneSearch(app) {
         connection('patient_arrivals')
             .select('*')
             .where('animal_id', animalId)
+            .andWhere('off_id', off_id) // off_id filtresi
             .orderBy('id', 'desc')
             .then(arrivals => {
                 if (!arrivals.length) {
@@ -209,8 +226,6 @@ function MethodPersoneSearch(app) {
                 return res.status(500).json({ error: 'Sunucu hatası', status: 'error' });
             });
     });
-
-
 }
 
 export default MethodPersoneSearch;

@@ -9,6 +9,7 @@ function methodPatProcess(app) {
     // 1️⃣ pa_id'ye göre tüm işlemleri çekme
     app.get('/api/patient-process/:pa_id', authenticateToken, async (req, res) => {
         try {
+            const off_id = req.user.off_id;
             const { pa_id } = req.params;
 
             const result = await connection('patient_process as pp')
@@ -19,6 +20,7 @@ function methodPatProcess(app) {
                     this.on('pp.process_id', '=', 's.id').andOn('pp.row_type', '=', connection.raw('?', ['H']));
                 })
                 .where('pp.pa_id', pa_id)
+                .andWhere('pp.off_id', off_id)
                 .select(
                     'pp.*',
                     connection.raw(`CASE WHEN pp.row_type = 'M' THEN m.name ELSE s.name END as process_name`),
@@ -36,6 +38,7 @@ function methodPatProcess(app) {
     app.post('/api/add-patient-process', authenticateToken, async (req, res) => {
         const trx = await connection.transaction();
         try {
+            const off_id = req.user.off_id;
             const { pa_id, process_id, row_type, count, total_prices, unit_prices, ptime, note } = req.body;
 
             if (!count || count <= 0) {
@@ -70,7 +73,8 @@ function methodPatProcess(app) {
                 total_prices,
                 unit_prices,
                 ptime,
-                note
+                note,
+                off_id
             });
 
             if (row_type === 'M') {
@@ -131,10 +135,11 @@ function methodPatProcess(app) {
 
     // 3️⃣ İşlem silme
     app.delete('/api/delete-patient-process/:id', authenticateToken, async (req, res) => {
+        const off_id = req.user.off_id;
         const { id } = req.params;
 
         try {
-            const process = await connection('patient_process').where({ id }).first();
+            const process = await connection('patient_process').where({ id, off_id }).first();
 
             if (!process) {
                 return res.status(404).json({ message: 'Kayıt bulunamadı' });
@@ -155,12 +160,11 @@ function methodPatProcess(app) {
                 });
             }
 
-            // Materyalse işlem
             if (process.row_type === 'M') {
                 const movement = await connection('material_movements')
                     .where({
                         pp_id: process.id,
-                        inv_type: 3 // Tüketim
+                        inv_type: 3
                     })
                     .first();
 
@@ -183,7 +187,7 @@ function methodPatProcess(app) {
                 await deleteFeedWithReference(feed.id);
             }
 
-            await connection('patient_process').where({ id }).del();
+            await connection('patient_process').where({ id, off_id }).del();
 
             res.json({ message: 'Kayıt ve ilişkili işlemler başarıyla silindi.' });
         } catch (error) {
@@ -195,8 +199,9 @@ function methodPatProcess(app) {
     // 4️⃣ İşlem güncelleme
     app.put('/api/patient-process/:id', authenticateToken, async (req, res) => {
         try {
+            const off_id = req.user.off_id;
             const { id } = req.params;
-            const process = await connection('patient_process').where({ id }).first();
+            const process = await connection('patient_process').where({ id, off_id }).first();
 
             if (!process) {
                 return res.status(404).json({ message: "Kayıt bulunamadı." });
@@ -206,16 +211,18 @@ function methodPatProcess(app) {
                 return res.status(400).json({ message: "Ödenmiş kayıt güncellenemez." });
             }
 
-            const { process_id, row_type, count, total_price, ptime, note } = req.body;
+            const { process_id, row_type, count, total_prices, ptime, note } = req.body;
 
-            const updated = await connection('patient_process').where({ id }).update({
-                process_id,
-                row_type,
-                count,
-                total_price,
-                ptime,
-                note
-            });
+            await connection('patient_process')
+                .where({ id, off_id })
+                .update({
+                    process_id,
+                    row_type,
+                    count,
+                    total_prices,
+                    ptime,
+                    note
+                });
 
             res.json({ message: "Güncelleme başarılı." });
         } catch (error) {

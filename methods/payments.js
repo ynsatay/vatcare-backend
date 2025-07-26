@@ -7,23 +7,22 @@ function methodPayment(app) {
 
     app.get("/api/unpaid-processes", authenticateToken, async (req, res) => {
         try {
+            const off_id = req.user.off_id;
             const { pa_id } = req.query;
             if (!pa_id) return res.status(400).json({ message: "pa_id zorunludur" });
 
             const results = await connection('patient_process as pp')
-                // Henüz tahsil edilmemişleri filtrele
                 .where('pp.pa_id', pa_id)
+                .andWhere('pp.off_id', off_id)  // off_id filtresi
                 .whereNotIn('pp.id', function () {
                     this.select('pp_id').from('patient_revenue_det');
                 })
-                // İşlem detaylarını materials ve services tablosundan al
                 .leftJoin('materials as m', function () {
                     this.on('pp.process_id', '=', 'm.id').andOn('pp.row_type', '=', connection.raw('?', ['M']));
                 })
                 .leftJoin('services as s', function () {
                     this.on('pp.process_id', '=', 's.id').andOn('pp.row_type', '=', connection.raw('?', ['H']));
                 })
-                // Seçilecek alanlar
                 .select(
                     'pp.*',
                     connection.raw(`CASE WHEN pp.row_type = 'M' THEN m.name ELSE s.name END as process_name`),
@@ -37,10 +36,10 @@ function methodPayment(app) {
         }
     });
 
-
     // Tahsilat ekleme
     app.post("/api/add-payment", authenticateToken, async (req, res) => {
         try {
+            const off_id = req.user.off_id;
             const { pa_id, vet_u_id, type, is_refund = false, details } = req.body;
 
             if (!pa_id || !vet_u_id || !type || !Array.isArray(details) || details.length === 0) {
@@ -57,9 +56,9 @@ function methodPayment(app) {
                 ctime: new Date(),
                 ptime: new Date(),
                 amount: totalAmount,
+                off_id
             });
 
-            // 2. Detay kayıtlarını ekle (her detay için)
             const detailRows = details.map(({ pp_id, amount }) => ({
                 revenue_id: paymentId,
                 pp_id,
@@ -70,6 +69,7 @@ function methodPayment(app) {
 
             await connection('patient_process')
                 .whereIn('id', details.map(d => d.pp_id))
+                .andWhere('off_id', off_id)
                 .update({ is_paid: true });
 
             const patientArrival = await connection('patient_arrivals')
@@ -87,8 +87,6 @@ function methodPayment(app) {
                 reference_id: paymentId
             });
 
-            // İstersen burada, tahsil edilen işlemlerin patient_process tablosunda durum güncellemesi yapılabilir
-
             res.json({ message: "Tahsilat başarıyla eklendi", paymentId });
         } catch (error) {
             console.error("API add-payment error:", error);
@@ -99,23 +97,23 @@ function methodPayment(app) {
     // Tahsilat listesi (master ve detayları getir)
     app.get("/api/payments/:pa_id", authenticateToken, async (req, res) => {
         try {
+            const off_id = req.user.off_id;
             const { pa_id } = req.params;
             if (!pa_id) return res.status(400).json({ message: "pa_id zorunludur" });
 
-            // 1. Master tahsilat kayıtları
             const payments = await connection("patient_revenues as pr")
                 .select(
                     "pr.*",
-                    "pr.amount as total_prices")
-
+                    "pr.amount as total_prices"
+                )
                 .where("pr.pa_id", pa_id)
+                .andWhere('pr.off_id', off_id)  // off_id filtresi
                 .orderBy("pr.ctime", "desc");
 
             if (!payments.length) return res.json([]);
 
             const pr_ids = payments.map(p => p.id);
 
-            // 2. Tüm detayları al + patient_process bilgileri
             const baseDetails = await connection("patient_revenue_det as det")
                 .whereIn("det.revenue_id", pr_ids)
                 .leftJoin("patient_process as pp", "det.pp_id", "pp.id")
@@ -124,10 +122,11 @@ function methodPayment(app) {
                     "pp.process_id",
                     "pp.row_type",
                     "pp.count",
-                    "pp.total_prices"
-                );
+                    "pp.total_prices",
+                    "pp.off_id"
+                )
+                .andWhere('pp.off_id', off_id); // off_id filtresi detayda da
 
-            // 3. pp_id => process_id ve row_type map’ini kur
             const serviceIds = [];
             const stockIds = [];
 
@@ -136,7 +135,6 @@ function methodPayment(app) {
                 else if (d.row_type === "M") stockIds.push(d.process_id);
             }
 
-            // 4. Hizmet ve malzeme adlarını al
             const serviceMap = {};
             const stockMap = {};
 
@@ -154,7 +152,6 @@ function methodPayment(app) {
                 });
             }
 
-            // 5. İsimleri detaylara ekle
             const detailsWithNames = baseDetails.map(d => ({
                 ...d,
                 process_name:
@@ -163,14 +160,12 @@ function methodPayment(app) {
                         : stockMap[d.process_id] || "Malzeme (silinmiş)"
             }));
 
-            // 6. Detayları gruplandır
             const groupedDetails = {};
             for (const detail of detailsWithNames) {
                 if (!groupedDetails[detail.revenue_id]) groupedDetails[detail.revenue_id] = [];
                 groupedDetails[detail.revenue_id].push(detail);
             }
 
-            // 7. Master'a detayları bağla
             const result = payments.map(payment => ({
                 ...payment,
                 details: groupedDetails[payment.id] || []
@@ -183,35 +178,20 @@ function methodPayment(app) {
         }
     });
 
-
     app.delete("/api/delete-payment/:id", authenticateToken, async (req, res) => {
         try {
+            const off_id = req.user.off_id;
             const { id } = req.params;
 
-            const payment = await connection("patient_revenues").where({ id }).first();
+            const payment = await connection("patient_revenues").where({ id, off_id }).first();
 
             if (!payment) {
                 return res.status(404).json({ message: "Tahsilat bulunamadı" });
             }
 
-            // Önce detayları al (çünkü detayları sildikten sonra pp_id'leri kalmaz)
             const details = await connection("patient_revenue_det").where({ revenue_id: id });
 
-            // Detayları sil
             await connection("patient_revenue_det").where({ revenue_id: id }).del();
-
-            // Feed kontrolü
-            // const feed = await connection('feeds')
-            //     .where({ reference_table: 'patient_revenues', reference_id: id })
-            //     .first();
-
-            // if (feed) {
-            //     // Feed varsa, hem feed hem master kaydı siler
-            //     await deleteFeedWithReference(feed.id);
-            // } else {
-            //     // Feed yoksa, master kaydı kendimiz sil
-            //     await connection("patient_revenues").where({ id }).del();
-            // }
 
             const patientArrival = await connection('patient_arrivals')
                 .select('u_id')
@@ -227,13 +207,14 @@ function methodPayment(app) {
                 reference_table: 'patient_revenues',
                 reference_id: id
             });
-            await connection("patient_revenues").where({ id }).del();
 
-            // Şimdi detaylarda bulunan pp_id'lerin is_paid alanını 0 yap
+            await connection("patient_revenues").where({ id, off_id }).del();
+
             const ppIds = details.map(d => d.pp_id);
             if (ppIds.length) {
                 await connection("patient_process")
                     .whereIn("id", ppIds)
+                    .andWhere('off_id', off_id)
                     .update({ is_paid: 0 });
             }
 
@@ -248,21 +229,20 @@ function methodPayment(app) {
 
     app.get("/api/payment-summary/:pa_id", authenticateToken, async (req, res) => {
         try {
+            const off_id = req.user.off_id;
             const { pa_id } = req.params;
 
-            // patient_process toplam borç (total_price toplamı)
             const totalResult = await connection("patient_process")
-                .where({ pa_id })
+                .where({ pa_id, off_id })
                 .sum("total_prices as total")
                 .first();
 
             const total = Number(totalResult.total) || 0;
 
-            // patient_revenues ve detaylardan ödenen tutarı hesapla
-            // patient_revenue_det.total_prices toplamı ile
             const paidResult = await connection("patient_revenues as pr")
                 .join("patient_revenue_det as det", "pr.id", "det.revenue_id")
                 .where("pr.pa_id", pa_id)
+                .andWhere('pr.off_id', off_id)
                 .sum("det.amount as paid")
                 .first();
 

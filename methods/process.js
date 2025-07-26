@@ -250,11 +250,14 @@ function methodProcess(app) {
     //Aşı kullanımı
     app.get('/api/vaccine-usage-last-month', authenticateToken, async (req, res) => {
         try {
+            const off_id = req.user.off_id;
+
             const result = await connection('patient_process as pp')
                 .join('materials as m', 'pp.process_id', 'm.id')
                 .where('pp.row_type', 'M')
                 .andWhere('m.category', 5) // Aşı kategorisi
                 .andWhere('pp.ctime', '>=', connection.raw("DATE_SUB(NOW(), INTERVAL 30 DAY)"))
+                .andWhere('pp.off_id', off_id)   // off_id filtresi eklendi
                 .select('m.name')
                 .sum('pp.count as usage_count')
                 .groupBy('m.name')
@@ -267,13 +270,16 @@ function methodProcess(app) {
         }
     });
 
-    app.get('/api/simple-vaccine-usage', async (req, res) => {
+    app.get('/api/simple-vaccine-usage', authenticateToken, async (req, res) => {
         try {
+            const off_id = req.user.off_id;
+
             const result = await connection('patient_process as pp')
                 .join('materials as m', 'pp.process_id', 'm.id')
                 .where('pp.row_type', 'M')         // sadece stok kullanımı
                 .andWhere('m.category', 5)         // aşı kategorisi
                 .andWhere('pp.ctime', '>=', connection.raw('DATE_SUB(CURDATE(), INTERVAL 12 MONTH)'))
+                .andWhere('pp.off_id', off_id)   // off_id filtresi eklendi
                 .select([
                     connection.raw('MONTH(pp.ctime) as month'),
                     'm.name as vaccine_name'
@@ -286,7 +292,6 @@ function methodProcess(app) {
             res.status(500).json({ error: "Veri alınamadı", details: err });
         }
     });
-
 
 
 

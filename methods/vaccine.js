@@ -5,6 +5,7 @@ import authenticateToken from './Middleware/index.js';
 function methodVaccine(app) {
     //1. Planlanan aşıların Ay'a göre listelenmesi
     app.get('/api/vaccine/calendarEvents', authenticateToken, async (req, res) => {
+        const off_id = req.user.off_id;
         const { startDate, endDate } = req.query;
 
         if (!startDate || !endDate) {
@@ -23,7 +24,8 @@ function methodVaccine(app) {
                     'm.name as vaccine_name',
                     'ua.animalname as animal_name'
                 )
-                .where(function () {
+                .where('vp.off_id', off_id)
+                .andWhere(function () {
                     this.whereBetween('vp.planned_date', [startDate, endDate])
                         .orWhereBetween('vp.applied_on', [startDate, endDate]);
                 });
@@ -37,6 +39,7 @@ function methodVaccine(app) {
 
     //2. Hayvana ait uygulanmaya aşı planları 
     app.get('/api/vaccine/plans/unapplied/:animalId', authenticateToken, async (req, res) => {
+        const off_id = req.user.off_id;
         const { animalId } = req.params;
 
         try {
@@ -50,7 +53,7 @@ function methodVaccine(app) {
                     'm.name as vaccine_name',
                     'vp.m_id'
                 )
-                .where({ 'vp.animal_id': animalId, 'vp.is_applied': false })
+                .where({ 'vp.animal_id': animalId, 'vp.is_applied': false, 'vp.off_id': off_id })
                 .orderBy('vp.planned_date', 'asc');
 
             res.json(planned);
@@ -62,6 +65,7 @@ function methodVaccine(app) {
 
     //3. Hayvana ait uygulanan aşı planları 
     app.get('/api/vaccine/plans/applied/:animalId', authenticateToken, async (req, res) => {
+        const off_id = req.user.off_id;
         const { animalId } = req.params;
 
         try {
@@ -75,7 +79,7 @@ function methodVaccine(app) {
                     'vp.animal_id',
                     'm.name as vaccine_name'
                 )
-                .where({ 'vp.animal_id': animalId, 'vp.is_applied': true })
+                .where({ 'vp.animal_id': animalId, 'vp.is_applied': true, 'vp.off_id': off_id })
                 .orderBy('vp.applied_on', 'desc');
 
             res.json(applied);
@@ -87,6 +91,7 @@ function methodVaccine(app) {
 
     //4. hayvana aşı planı oluşturma
     app.post('/api/vaccine/plan-multiple', authenticateToken, async (req, res) => {
+        const off_id = req.user.off_id;
         const { animal_id, m_id, planned_date, repeat_interval_months, repeat_count, notes, created_by } = req.body;
 
         if (!animal_id || !m_id || !planned_date || !repeat_interval_months || !repeat_count) {
@@ -109,6 +114,7 @@ function methodVaccine(app) {
                     applied_on: null,
                     notes,
                     created_by,
+                    off_id,
                     created_at: new Date().toISOString().slice(0, 19).replace("T", " "),
                 });
             }
@@ -130,11 +136,12 @@ function methodVaccine(app) {
 
     //5. aşı planı güncelleme
     app.put('/api/vaccine/plan/:id', authenticateToken, async (req, res) => {
+        const off_id = req.user.off_id;
         const { id } = req.params;
         const { planned_date, notes } = req.body;
 
         try {
-            const plan = await connection('vaccination_plan').where({ id }).first();
+            const plan = await connection('vaccination_plan').where({ id, off_id }).first();
 
             if (!plan) {
                 return res.status(404).json({ error: 'Plan kaydı bulunamadı' });
@@ -145,7 +152,7 @@ function methodVaccine(app) {
             }
 
             await connection('vaccination_plan')
-                .where({ id })
+                .where({ id, off_id })
                 .update({
                     planned_date,
                     notes
@@ -160,10 +167,11 @@ function methodVaccine(app) {
 
     //6. Aşı planını silme
     app.delete('/api/vaccine/plan/:id', authenticateToken, async (req, res) => {
+        const off_id = req.user.off_id;
         const { id } = req.params;
 
         try {
-            const plan = await connection('vaccination_plan').where({ id }).first();
+            const plan = await connection('vaccination_plan').where({ id, off_id }).first();
 
             if (!plan) {
                 return res.status(404).json({ error: 'Plan kaydı bulunamadı' });
@@ -173,7 +181,7 @@ function methodVaccine(app) {
                 return res.status(400).json({ error: 'Uygulanan plan silinemez' });
             }
 
-            await connection('vaccination_plan').where({ id }).delete();
+            await connection('vaccination_plan').where({ id, off_id }).delete();
 
             res.json({ message: 'Plan kaydı silindi' });
         } catch (err) {
@@ -182,9 +190,9 @@ function methodVaccine(app) {
         }
     });
 
-
     //6. Seçilen aşı planının detayını getirme
     app.get('/api/vaccine/plan/:id', authenticateToken, async (req, res) => {
+        const off_id = req.user.off_id;
         const { id } = req.params;
 
         try {
@@ -203,6 +211,7 @@ function methodVaccine(app) {
                     connection.raw("CONCAT(u.name, ' ', u.surname) as owner_name")
                 )
                 .where('vp.id', id)
+                .andWhere('vp.off_id', off_id)
                 .first();
 
             if (!plan) {
@@ -218,12 +227,19 @@ function methodVaccine(app) {
 
     //7. Aşı planının uygulanması
     app.put('/api/vaccine/plan/:id/apply', authenticateToken, async (req, res) => {
+        const off_id = req.user.off_id;
         const { id } = req.params;
         const { pp_id } = req.body;
 
         try {
+            const plan = await connection('vaccination_plan').where({ id, off_id }).first();
+
+            if (!plan) {
+                return res.status(404).json({ error: 'Plan kaydı bulunamadı.' });
+            }
+
             const updated = await connection('vaccination_plan')
-                .where({ id })
+                .where({ id, off_id })
                 .update({
                     is_applied: true,
                     applied_on: new Date(),
@@ -233,7 +249,7 @@ function methodVaccine(app) {
             if (updated) {
                 res.json({ message: 'Aşı uygulandı olarak işaretlendi.' });
             } else {
-                res.status(404).json({ error: 'Plan kaydı bulunamadı.' });
+                res.status(500).json({ error: 'Plan güncellenirken hata oluştu.' });
             }
         } catch (err) {
             console.error("Güncelleme hatası:", err);
@@ -243,8 +259,13 @@ function methodVaccine(app) {
 
     //EKSTRA - Aşıları getirir.
     app.get('/api/vaccine/materials', authenticateToken, async (req, res) => {
+        const off_id = req.user.off_id;
         try {
-            const materials = await connection('materials').select('*').whereRaw("category = 5");
+            const materials = await connection('materials')
+                .select('*')
+                .whereRaw("category = 5")
+                .andWhere('off_id', off_id);
+
             return res.status(200).json({
                 status: 'success',
                 data: materials
@@ -254,8 +275,6 @@ function methodVaccine(app) {
             return res.status(500).json({ error: 'Database error', status: 'error' });
         }
     });
-
-
 }
 
 export default methodVaccine;
