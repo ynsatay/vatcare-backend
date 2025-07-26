@@ -8,7 +8,7 @@ function methodsoffices(app) {
     connection
       .select('hr_offices.*')
       .select('clinic.name as clinic_name')
-      .select('users.name as user_name', 'users.surname as user_surname')
+      connection.raw("CONCAT(users.name, ' ', users.surname) as admin_name")
       .from('hr_offices')
       .join('clinic', 'hr_offices.clinic_id', 'clinic.id')  
       .join('users', 'hr_offices.admin_id', 'users.id')    
