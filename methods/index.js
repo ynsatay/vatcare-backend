@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import multer from 'multer';
 import authenticateToken from "./Middleware/index.js";
 import dotenv from 'dotenv';
+import nodemailer from 'nodemailer';
 dotenv.config();
 
 const storage = multer.memoryStorage();
