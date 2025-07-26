@@ -12,6 +12,7 @@ exports.seed = async function(knex) {
         id: 1,
         clinic_id: 1,
         admin_id: 1,
+        name: 'Merkez Şube',
         email: 'admin@clinic.com',
         phone: '0123456789',
         created_at: new Date(),

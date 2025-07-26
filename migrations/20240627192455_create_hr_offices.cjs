@@ -7,6 +7,7 @@ exports.up = function (knex) {
         table.increments('id').primary();
         table.integer('clinic_id').notNullable();
         table.integer('admin_id').notNullable();
+        table.string('name').notNullable();
         table.string('email').notNullable();
         table.string('phone').notNullable();
         table.timestamps(true, true);
