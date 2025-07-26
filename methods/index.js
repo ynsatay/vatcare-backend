@@ -16,35 +16,52 @@ function methods(app) {
     app.post('/api/login', (req, res) => {
         const { username, password } = req.body;
 
-        if (username === '' || password === '') {
+        if (!username || !password) {
             return res.status(400).json({ error: 'Kullanıcı adı ve şifre gereklidir', status: 'error' });
         }
 
-        connection.select().from('users').where('uname', username).orWhere('email', username).then((user) => {
-            if (user.length === 0) {
-                return res.status(400).json({ error: 'Kullanıcı adı veya şifre hatalı', status: 'error' });
-            }
-
-            const hashedPassword = user[0].password;
-            bcrypt.compare(password, hashedPassword, (err, result) => {
-                if (err || !result) {
+        connection('users')
+            .where('uname', username)
+            .orWhere('email', username)
+            .first()
+            .then((user) => {
+                if (!user) {
                     return res.status(400).json({ error: 'Kullanıcı adı veya şifre hatalı', status: 'error' });
                 }
 
-                const token = jwt.sign({ username: username }, 'secret', { expiresIn: '24h' });
+                bcrypt.compare(password, user.password, (err, result) => {
+                    if (err || !result) {
+                        return res.status(400).json({ error: 'Kullanıcı adı veya şifre hatalı', status: 'error' });
+                    }
 
-                var response = {
-                    status: 'success',
-                    message: 'Giriş başarılı',
-                    token: token,
-                    userid: user[0].id,
-                    username: user[0].uname,
-                    userRole: user[0].role
-                }
+                    // JWT payload içine off_id dahil edildi
+                    const token = jwt.sign(
+                        {
+                            username: user.uname,
+                            off_id: user.off_id,
+                            role: user.role
+                        },
+                        process.env.JWT_SECRET || 'secret', // secret key env değişkeninden alınmalı
+                        { expiresIn: '24h' }
+                    );
 
-                return res.status(200).json(response);
+                    const response = {
+                        status: 'success',
+                        message: 'Giriş başarılı',
+                        token: token,
+                        userid: user.id,
+                        username: user.uname,
+                        userRole: user.role,
+                        off_id: user.off_id
+                    };
+
+                    return res.status(200).json(response);
+                });
+            })
+            .catch((error) => {
+                console.error('Login error:', error);
+                return res.status(500).json({ error: 'Sunucu hatası', status: 'error' });
             });
-        });
     });
 
     // HR Offices listesini çekme endpointi
@@ -336,7 +353,7 @@ function methods(app) {
                        Plan: ${plan}
                        Mesaj: ${message || '—'}
                     `,
-                                });
+            });
 
             res.status(200).json({ success: true, message: 'Demo talebi gönderildi' });
         } catch (error) {
