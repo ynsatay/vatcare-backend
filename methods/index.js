@@ -317,7 +317,7 @@ function methods(app) {
 
         try {
             await sendMail({
-                to: email,
+                to: "ynsmratay@gmail.com",
                 subject: 'Demo Talebi',
                 text: `İsim: ${name}
                        E-posta: ${email}
@@ -327,7 +327,7 @@ function methods(app) {
                     `,
                                 });
 
-            res.status(200).json({ message: 'Demo talebi gönderildi' });
+            res.status(200).json({ success: true, message: 'Demo talebi gönderildi' });
         } catch (error) {
             console.error('Mail gönderme hatası:', error);
             res.status(500).json({ message: 'Mail gönderme başarısız' });
