@@ -93,7 +93,8 @@ function methodPatProcess(app) {
                     total_price: total_prices,
                     movement_date: new Date(),
                     inv_type: 3,
-                    created_at: new Date()
+                    created_at: new Date(),
+                    off_id : off_id
                 });
             }
 
@@ -119,7 +120,8 @@ function methodPatProcess(app) {
                 color: "info",
                 feed_date: new Date(),
                 reference_table: 'patient_process',
-                reference_id: insertedId
+                reference_id: insertedId,
+                off_id : off_id
             }, trx);
 
             await trx.commit();
