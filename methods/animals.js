@@ -16,6 +16,7 @@ function methodsanimals(app) {
         });
 
     });
+
     //Hayvan türleri apileri
     app.get('/api/animalsspecies', authenticateToken, (req, res) => {
         const { animal_id } = req.query;
@@ -31,8 +32,10 @@ function methodsanimals(app) {
             return res.status(500).json({ error: 'Database error', status: 'error' });
         });
     });
+
     app.get('/api/animalslist', authenticateToken, (req, res) => {
         const { user_id } = req.query;
+        const offId = req.user.off_id;
         connection
             .select('users_animals.*')
             .select('users_animals.id as data_id')
@@ -47,6 +50,7 @@ function methodsanimals(app) {
             .join('animals_species', 'users_animals.animal_species_id', 'animals_species.id')
             .join('users', 'users_animals.user_id', 'users.id')
             .where('users_animals.user_id', user_id)
+            .andWhere('users_animals.off_id', offId)
             .then((animal) => {
 
                 return res.status(200).json({ status: 'success', response: animal });
@@ -107,7 +111,7 @@ function methodsanimals(app) {
 
     app.post('/api/animalpost', authenticateToken, async (req, res) => {
         try {
-            console.log("Gelen body:", req.body);
+            const offId = req.user.off_id;
 
             let {
                 user_id,
@@ -118,7 +122,7 @@ function methodsanimals(app) {
                 animalidentnumber,
                 picture,
                 isdeath,
-                animalname
+                animalname,
             } = req.body;
 
             // Tip dönüşümü
@@ -132,7 +136,6 @@ function methodsanimals(app) {
 
             if (!animalidentnumber) {
                 animalidentnumber = Math.floor(100000 + Math.random() * 900000).toString();
-                console.log("Otomatik üretilen animalidentnumber:", animalidentnumber);
             }
 
             if (!user_id || !animal_id || !animal_species_id) {
@@ -158,7 +161,8 @@ function methodsanimals(app) {
                 picture,
                 active: 1,
                 isdeath,
-                animalname
+                animalname,
+                off_id: offId 
             });
 
             console.log("Hayvan adı veritabanına eklendi:", animalname);
