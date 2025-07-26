@@ -9,6 +9,7 @@ exports.up = function(knex) {
     table.timestamp('inv_date').notNullable();              // Fatura tarihi
     table.integer('inv_type').notNullable();                // 1:Alım, 2:İade, 3:Çıkış 
     table.decimal('total_amount', 10, 2).notNullable();    // Toplam fatura tutarı
+    table.integer('off_id').notNullable();
     table.timestamps(true, true);                          // created_at ve updated_at
   });
 };

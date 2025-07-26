@@ -9,6 +9,7 @@ exports.up = function(knex) {
       .references("id").inTable("users")
       .onDelete("SET NULL")
       .nullable();
+    table.integer('off_id').notNullable();
     table.string("title", 500).notNullable();
     table.string("icon").defaultTo("bi bi-info-circle");
     table.string("color").defaultTo("primary");

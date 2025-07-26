@@ -16,6 +16,7 @@ exports.up = function(knex) {
     table.integer('pp_id').unsigned();
     table.integer('created_by').unsigned()
       .references('id').inTable('users').onDelete('SET NULL');
+    table.integer('off_id').notNullable();
     table.timestamp('created_at').defaultTo(knex.fn.now());
   });
 };

@@ -11,6 +11,7 @@ exports.up = function(knex) {
         table.string('email').notNullable();
         table.string('phone').notNullable();
         table.integer('clinic_admin').notNullable();
+        table.integer('package_type').nullable(); // Örn: 1=Başlangıç, 2 = Standart, 3 = Profesyonel
         table.timestamps(true, true);
     });
 };

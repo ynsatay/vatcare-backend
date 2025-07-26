@@ -9,6 +9,7 @@ exports.up = function (knex) {
       table.timestamp('process_date').notNullable(); 
       table.timestamp('start_time').notNullable();
       table.timestamp('end_time').notNullable();
+      table.integer('off_id').notNullable();
       table.text('notes').nullable();
       table.integer('status').defaultTo(0);
       table.integer('app_type').defaultTo(0);

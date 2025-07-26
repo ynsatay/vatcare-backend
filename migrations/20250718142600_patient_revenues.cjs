@@ -6,6 +6,7 @@ exports.up = function(knex) {
   return knex.schema.createTable('patient_revenues', table => {
     table.increments('id').primary();
     table.integer('pa_id').notNullable().index();  // Hasta geliş dosyası id
+    table.integer('off_id').notNullable();
     table.timestamp('ctime').defaultTo(knex.fn.now()).notNullable();
     table.timestamp('ptime').nullable();
     table.integer('vet_u_id').notNullable().index(); // Tahsilatı yapan kullanıcı

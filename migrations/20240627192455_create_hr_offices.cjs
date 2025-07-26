@@ -6,8 +6,7 @@ exports.up = function (knex) {
     return knex.schema.createTable('hr_offices', table => {
         table.increments('id').primary();
         table.integer('clinic_id').notNullable();
-        table.integer('package_type').nullable();
-        table.integer('Admin_id').notNullable();
+        table.integer('admin_id').notNullable();
         table.string('email').notNullable();
         table.string('phone').notNullable();
         table.timestamps(true, true);

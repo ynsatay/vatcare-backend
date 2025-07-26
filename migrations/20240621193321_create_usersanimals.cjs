@@ -8,6 +8,7 @@ exports.up = function(knex) {
       table.integer('user_id').notNullable();
       table.integer('animal_id').notNullable();
       table.integer('animal_species_id').notNullable();
+      table.integer('off_id').notNullable();
       table.boolean('active').defaultTo(true);
       table.boolean('isdeath').defaultTo(false);     
       table.timestamp('birthdate').notNullable();

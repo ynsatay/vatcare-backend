@@ -19,6 +19,7 @@ exports.up = function(knex) {
     table.decimal('total_price', 10, 2).notNullable();
     table.timestamp('movement_date').notNullable();
     table.integer('inv_type').notNullable(); // Analizler için tekrar
+    table.integer('off_id').notNullable();
     table.timestamps(true, true);
   });
 };

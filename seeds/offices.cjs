@@ -1,12 +1,22 @@
 /**
  * @param { import("knex").Knex } knex
- * @returns { Promise<void> } 
+ * @returns { Promise<void> }
  */
 exports.seed = async function(knex) {
-  // Deletes ALL existing entries
-  await knex('hr_offices').del()
-  await knex('hr_offices').insert([
-    { id :1, clinic_id: '1', package_type: '1', Admin_id: '1', email: '1', phone: '1' },
-    { id :2, clinic_id: '2', package_type: '2', Admin_id: '2', email: '2', phone: '2' }
-  ]);
+  // Sadece id=1 kayıt yoksa ekle
+  const exists = await knex('hr_offices').where({ id: 1 }).first();
+
+  if (!exists) {
+    await knex('hr_offices').insert([
+      {
+        id: 1,
+        clinic_id: 1,
+        admin_id: 1,
+        email: 'admin@clinic.com',
+        phone: '0123456789',
+        created_at: new Date(),
+        updated_at: new Date(),
+      }
+    ]);
+  }
 };

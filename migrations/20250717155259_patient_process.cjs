@@ -7,6 +7,7 @@ exports.up = function(knex) {
     table.increments('id').primary(); // ID
     table.integer('pa_id').unsigned().notNullable();// GELİŞ DOSYASI ID
     table.integer('process_id').unsigned().notNullable(); // İŞLEM ID
+    table.integer('off_id').notNullable();
     table.enu('row_type', ['M', 'H']).notNullable(); // 'M': Malzeme, 'H': Hizmet
     table.integer('count').unsigned().notNullable().defaultTo(1); // KAÇ ADET
     table.decimal('total_prices', 10, 2).notNullable(); // TOPLAM TUTAR

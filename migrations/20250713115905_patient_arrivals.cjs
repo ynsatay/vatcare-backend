@@ -8,6 +8,7 @@ exports.up = function (knex) {
         table.integer('u_id').notNullable();
         table.integer('animal_id').notNullable();
         table.integer('vet_u_id').notNullable();
+        table.integer('off_id').notNullable();
         table.timestamp('ctime').nullable();
         table.integer('type').notNullable(); 
         table.integer('status').notNullable();
