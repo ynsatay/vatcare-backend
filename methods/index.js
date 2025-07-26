@@ -317,7 +317,7 @@ function methods(app) {
 
         try {
             await sendMail({
-                to: formData.email,
+                to: email,
                 subject: 'Demo Talebi',
                 text: `İsim: ${name}
                        E-posta: ${email}
