@@ -14,11 +14,16 @@ function methodpersonal(app) {
             const {
                 name, surname, username, password, passwordAgain,
                 email, role, address, phone, picture,
-                birthdate, sex, active, identity // ✅ TC'yi aldık
+                birthdate, sex, active, identity
             } = req.body;
 
             if (!name || !surname || !username || !password || !email || !role) {
                 return res.status(400).json({ error: 'Zorunlu alanları doldurunuz', status: 'error' });
+            }
+
+            const offId = req.user.off_id;
+            if (!offId) {
+                return res.status(403).json({ error: 'Şube bilgisi bulunamadı', status: 'error' });
             }
 
             connection.select().from('users').where('uname', username).orWhere('email', email).then((user) => {
@@ -47,16 +52,17 @@ function methodpersonal(app) {
                             birthdate,
                             sex,
                             active,
-                            identity // ✅ TC burada kaydediliyor
+                            identity,
+                            off_id: offId
                         })
-                        .returning('id') // ⬅️ id'yi döndür ki username güncellemek için kullanılabilsin
+                        .returning('id')
                         .then((insertedIds) => {
                             const newUserId = insertedIds[0];
                             return res.status(200).json({
                                 status: 'success',
                                 message: 'Kayıt işlemi tamamlandı.',
                                 token,
-                                insertId: newUserId // ✅ frontend buradan ID'yi alabilir
+                                insertId: newUserId
                             });
                         });
                 });
@@ -90,31 +96,36 @@ function methodpersonal(app) {
     });
 
     app.get('/api/getpersonel', authenticateToken, (req, res) => {
-        connection.select().from('users').where('role', '<>', 1).then((users) => {
-            if (users.length === 0) {
-                return res.status(404).json({ error: 'Personel bulunamadı', status: 'error' });
-            }
+        const offId = req.user.off_id; // Token'dan off_id alıyoruz
 
-            const response = users.map((user) => ({
-                id: user.id,
-                name: user.name,
-                surname: user.surname,
-                username: user.uname,
-                email: user.email,
-                role: user.role,
-                address: user.address,
-                phone: user.phone,
-                picture: user.picture,
-                birthdate: user.birthdate,
-                sexuality: user.sex,
-                role: user.role,
-                active: user.active
-            }));
-            return res.status(200).json({ status: 'success', users: response });
-        }).catch((error) => {
-            console.error('Personel bilgileri getirilirken bir hata oluştu:', error);
-            return res.status(500).json({ error: 'Sunucu hatası', status: 'error' });
-        });
+        connection.select().from('users')
+            .where('role', '<>', 1)
+            .andWhere('off_id', offId) // off_id ile filtreleme
+            .then((users) => {
+                if (users.length === 0) {
+                    return res.status(404).json({ error: 'Personel bulunamadı', status: 'error' });
+                }
+
+                const response = users.map((user) => ({
+                    id: user.id,
+                    name: user.name,
+                    surname: user.surname,
+                    username: user.uname,
+                    email: user.email,
+                    role: user.role,
+                    address: user.address,
+                    phone: user.phone,
+                    picture: user.picture,
+                    birthdate: user.birthdate,
+                    sexuality: user.sex,
+                    active: user.active
+                }));
+                return res.status(200).json({ status: 'success', users: response });
+            })
+            .catch((error) => {
+                console.error('Personel bilgileri getirilirken bir hata oluştu:', error);
+                return res.status(500).json({ error: 'Sunucu hatası', status: 'error' });
+            });
     });
 
     app.put('/api/updatepersonel/:id', authenticateToken, (req, res) => {

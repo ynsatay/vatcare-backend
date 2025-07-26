@@ -284,6 +284,7 @@ function methods(app) {
     //Akışları getirir.
     app.get('/api/feeds', authenticateToken, async (req, res) => {
         try {
+            const userOffId = req.user.off_id;
             const feeds = await connection('feeds as f')
                 .leftJoin('users as u', 'f.user_id', 'u.id')
                 .select(
@@ -293,6 +294,7 @@ function methods(app) {
                     'f.color',
                     'f.created_at'
                 )
+                .where('f.off_id', userOffId)
                 .whereRaw('DATE(f.created_at) = CURDATE()')
                 .orderBy('f.created_at', 'desc')
                 .limit(50);
@@ -306,8 +308,10 @@ function methods(app) {
 
     app.get("/api/dashboardStats", authenticateToken, async (req, res) => {
         try {
+            const userOffId = req.user.off_id;
             const [appCompleted] = await connection("appointment_process")
                 .where("status", "2")
+                .where('off_id', userOffId)
                 .andWhereRaw("MONTH(start_time) = MONTH(CURRENT_DATE())")
                 .andWhereRaw("YEAR(start_time) = YEAR(CURRENT_DATE())")
                 .count("* as total");
@@ -315,15 +319,18 @@ function methods(app) {
             const [totalVaccines] = await connection('patient_process as pp')
                 .join('materials as m', 'pp.process_id', 'm.id')
                 .where('pp.row_type', 'M')
+                .where('off_id', userOffId)
                 .andWhere('m.category', 5)
                 .andWhere('pp.ctime', '>=', connection.raw("DATE_FORMAT(NOW(), '%Y-%m-01')"))
                 .sum('pp.count as total');
 
             const [appointments] = await connection("appointment_process")
+                .where('off_id', userOffId)
                 .whereRaw("DATE(start_time) = CURRENT_DATE()")
                 .count("* as total");
 
             const [totalPayments] = await connection('patient_revenues')
+                .where('off_id', userOffId)
                 .where('is_refund', 0)
                 .andWhere('ctime', '>=', connection.raw("DATE_FORMAT(NOW(), '%Y-%m-01')"))
                 .sum('amount as total');
