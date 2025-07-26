@@ -315,17 +315,15 @@ function methods(app) {
     app.post('/api/sendDemoRequest', async (req, res) => {
         const { name, email, phone, message, plan } = req.body;
 
-
-
         try {
             await sendMail({
                 to: formData.email,
                 subject: 'Demo Talebi',
-                text: `İsim: ${formData.name}
-                       E-posta: ${formData.email}
-                       Telefon: ${formData.phone}
-                       Plan: ${selectedPlan}
-                       Mesaj: ${formData.message || '—'}
+                text: `İsim: ${name}
+                       E-posta: ${email}
+                       Telefon: ${phone}
+                       Plan: ${plan}
+                       Mesaj: ${message || '—'}
                     `,
                                 });
 
