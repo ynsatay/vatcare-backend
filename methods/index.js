@@ -14,7 +14,7 @@ const upload = multer({ storage: storage });
 function methods(app) {
     //Giriş İşlemleri
     app.post('/api/login', (req, res) => {
-        const { username, password } = req.body;
+        const { username, password, office_id  } = req.body;
 
         if (!username || !password) {
             return res.status(400).json({ error: 'Kullanıcı adı ve şifre gereklidir', status: 'error' });
@@ -24,7 +24,7 @@ function methods(app) {
             .where(function () {
                 this.where('uname', username).orWhere('email', username);
             })
-            .andWhere('off_id', off_id)
+            .andWhere('off_id', office_id )
             .first()
             .then((user) => {
                 if (!user) {
