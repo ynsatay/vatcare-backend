@@ -179,7 +179,7 @@ function methods(app) {
     //Profili günceller
     app.post('/api/update-profile', authenticateToken, upload.single('picture'), (req, res) => {
         try {
-            const { userId, name, surname, password, phone, email, sex, birthdate, address } = req.body;
+            const { userId, name, surname, password, phone, email, sex, birthdate, address, nationality } = req.body;
 
             if (req.file) {
                 const allowedTypes = ['image/jpeg', 'image/png'];
@@ -196,7 +196,8 @@ function methods(app) {
                 email,
                 sex,
                 birthdate,
-                address
+                address,
+                nationality
             };
 
             if (req.file) {
