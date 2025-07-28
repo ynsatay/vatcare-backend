@@ -83,9 +83,9 @@ function methodPatProcess(app) {
 
             if (row_type === 'M') {
                 // Stoktan düş
-                await trx('material_det')
-                    .where({ m_id: process_id, off_id })
-                    .decrement('quantity', count);
+                // await trx('material_det')
+                //     .where({ m_id: process_id, off_id })
+                //     .decrement('quantity', count);
 
                 // Stok hareketi kaydı
                 await trx('material_movements').insert({
