@@ -117,7 +117,6 @@ function methodsprovider(app) {
         }
     });
 
-    // Yeni tedarikçi fiyat detayı ekle
     app.post('/api/provider-price-create', authenticateToken, async (req, res) => {
         const { pf_id, material_id, purchase_price, vat_rate, is_default, active } = req.body;
 
