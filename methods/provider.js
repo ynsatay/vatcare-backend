@@ -23,7 +23,7 @@ function methodsprovider(app) {
         }
     });
 
-    app.post('/api/provider_firms', authenticateToken, async (req, res) => {
+    app.post('/api/add-provider-firms', authenticateToken, async (req, res) => {
         const { name, contact_person, phone, email, address, active } = req.body;
 
         if (!name) {
@@ -47,7 +47,7 @@ function methodsprovider(app) {
         }
     });
 
-    app.put('/api/provider_firms/:id', authenticateToken, async (req, res) => {
+    app.put('/api/upd-provider-firms/:id', authenticateToken, async (req, res) => {
         const { id } = req.params;
         const { name, contact_person, phone, email, address, active } = req.body;
 
