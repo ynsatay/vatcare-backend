@@ -190,7 +190,7 @@ function methodPatProcess(app) {
                 .first();
 
             if (feed) {
-                await deleteFeedWithReference(feed.id);
+                await deleteFeedWithReference(feed.id, off_id);
             }
 
             await connection('patient_process').where({ id : process.id }).del();
