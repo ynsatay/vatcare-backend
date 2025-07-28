@@ -77,3 +77,5 @@ function methodsprovider(app) {
 
 
 }
+
+export default methodsprovider;
