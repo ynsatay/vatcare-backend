@@ -193,7 +193,7 @@ function methodPatProcess(app) {
                 await deleteFeedWithReference(feed.id);
             }
 
-            await connection('patient_process').where({ id, off_id }).del();
+            await connection('patient_process').where({ id : process.id }).del();
 
             res.json({ message: 'Kayıt ve ilişkili işlemler başarıyla silindi.' });
         } catch (error) {
