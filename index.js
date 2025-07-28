@@ -43,6 +43,7 @@ methodPatProcess(app);
 methodPayment(app);
 methodStockMovements(app);
 methodVaccine(app);
+methodsprovider(app);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
