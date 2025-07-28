@@ -3,7 +3,7 @@
  * @returns { Promise<void> }
  */
 exports.up = function(knex) {
-  return knex.schema.createTable('material_det', (table) => {
+  return knex.schema.createTable('material_det', table => {
     table.increments('id').primary(); // Detay kaydı ID
     table.integer('off_id').unsigned().notNullable(); // Şube ID
     table.integer('m_id').unsigned().notNullable()
