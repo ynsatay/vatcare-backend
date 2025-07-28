@@ -176,7 +176,7 @@ function methodPatProcess(app) {
 
                 if (movement) {
                     await connection('material_det')
-                        .where({ m_id: process.process_id, off_id })
+                        .where({ m_id: process.process_id, off_id :off_id })
                         .increment('quantity', movement.quantity);
 
                     await connection('material_movements')
