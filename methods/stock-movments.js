@@ -191,21 +191,25 @@ function methodStockMovements(app) {
             // Örneğin, silinen hareketlere göre stokları geri almak
 
             // 1. Faturaya ait tüm hareketleri al
-            const movements = await trx("material_movements").where({ mi_id: id, off_id });
+            const movements = await trx("material_movements").where({ mi_id: id, off_id: off_id });
 
             // 2. Her hareket için stok güncelle (stokları eski haline getir)
             for (const m of movements) {
                 if (m.inv_type === 1) {
                     // Alım faturasındaki hareket ise stoktan düş
-                    await trx("materials").where("id", m.m_id).decrement("quantity", m.quantity);
+                    await trx("material_det")
+                        .where({ m_id: m.m_id, off_id: m.off_id }) // off_id önemli!
+                        .decrement("quantity", m.quantity);
                 } else {
                     // İade veya Tüketim ise stok ekle
-                    await trx("materials").where("id", m.m_id).increment("quantity", m.quantity);
+                    await trx("material_det")
+                        .where({ m_id: m.m_id, off_id: m.off_id })
+                        .increment("quantity", m.quantity);
                 }
             }
 
             // 3. Hareketleri sil
-            await trx("material_movements").where({ mi_id: id, off_id }).del();
+            await trx("material_movements").where({ mi_id: id, off_id: off_id }).del();
 
             await trx.commit();
             res.json({ success: true });
