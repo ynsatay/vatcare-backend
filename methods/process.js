@@ -5,7 +5,7 @@ import authenticateToken from './Middleware/index.js';
 function methodProcess(app) {
     app.post('/api/addMaterial', authenticateToken, async (req, res) => {
         try {
-            const { name, price, quantity, unit, category, min_stock_level, barcode, supplier_name, description } = req.body;
+            const { name, price, unit, category, min_stock_level, barcode, description } = req.body;
             // if (!name || !quantity || !unit) { //Stok Alım Ekanı için kaldırıldı.
             //     return res.status(400).json({ error: 'Bütün alanları doldurunuz', status: 'error' });
             // }
@@ -17,12 +17,10 @@ function methodProcess(app) {
             connection('materials').insert({
                 name: name,
                 price: price,
-                quantity: 0,
                 unit: unit,
                 category: category,
                 min_stock_level: min_stock_level,
                 barcode: barcode,
-                supplier_name: supplier_name,
                 description: description
             }).then(() => {
                 var response = {
