@@ -54,7 +54,7 @@ function methodProcess(app) {
     //Stok Lsitesini (Alım Fiyatı ile)
     app.get('/api/getMaterialsWithPrice', authenticateToken, async (req, res) => {
         try {
-            const off_id = req.user.off_id;
+            // const off_id = req.user.off_id; // artık kullanmıyoruz
 
             const subQuery = connection('provider_firm_det')
                 .select(
@@ -65,7 +65,7 @@ function methodProcess(app) {
                     'vat_rate',
                     'is_default',
                     'active',
-                    'off_id',
+                    // 'off_id', // yok, çıkar
                     connection.raw(`
           ROW_NUMBER() OVER (
             PARTITION BY material_id
@@ -73,13 +73,13 @@ function methodProcess(app) {
           ) as rn
         `)
                 )
-                .where('off_id', off_id)
+                // .where('off_id', off_id) // burayı kaldırıyoruz
                 .as('pfd_ranked');
 
             const materialsWithPrice = await connection('materials as m')
                 .leftJoin(subQuery, function () {
                     this.on('m.id', '=', 'pfd_ranked.material_id')
-                        .andOn('pfd_ranked.rn', '=', 1); // sadece ilk sıradakini alıyoruz
+                        .andOn('pfd_ranked.rn', '=', 1);
                 })
                 .leftJoin('provider_firms as pf', 'pfd_ranked.pf_id', 'pf.id')
                 .select(
@@ -103,7 +103,6 @@ function methodProcess(app) {
             return res.status(500).json({ error: 'Database error', status: 'error' });
         }
     });
-
     app.delete('/api/deleteMaterial/:id', authenticateToken, async (req, res) => {
         const id = req.params.id;
         try {
