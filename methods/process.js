@@ -51,6 +51,26 @@ function methodProcess(app) {
         }
     });
 
+    app.get('/api/getMaterialsWithQuantity', authenticateToken, async (req, res) => {
+        try {
+            const materials = await connection('materials as m')
+                .leftJoin('material_det as md', 'm.id', 'md.material_id')
+                .select(
+                    'm.*',
+                    connection.raw('COALESCE(SUM(md.quantity), 0) as total_quantity')
+                )
+                .groupBy('m.id'); // group by malzeme id'si (diğer tüm m.* alanlarının da group by'a dahil olması gerekebilir DB ayarına göre)
+
+            return res.status(200).json({
+                status: 'success',
+                data: materials,
+            });
+        } catch (error) {
+            console.error('Database error:', error);
+            return res.status(500).json({ error: 'Database error', status: 'error' });
+        }
+    });
+
     //Stok Lsitesini (Alım Fiyatı ile)
     app.get('/api/getMaterialsWithPrice', authenticateToken, async (req, res) => {
         try {

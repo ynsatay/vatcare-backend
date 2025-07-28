@@ -10,8 +10,6 @@ exports.up = function(knex) {
          .references('id').inTable('materials')
          .onDelete('CASCADE');
     table.integer('quantity').notNullable(); // Alınan miktar
-    table.decimal('tax_rate', 5, 2).defaultTo(0.0); // KDV oranı (örn: 18.00)
-    table.text('note'); // Açıklama / not
     table.timestamps(true, true); // created_at, updated_at
   });
 };
