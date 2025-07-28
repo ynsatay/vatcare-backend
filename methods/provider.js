@@ -136,8 +136,7 @@ function methodsprovider(app) {
 
             res.json({ status: 'success', message: 'Kayıt başarıyla eklendi.' });
         } catch (error) {
-            console.error('Insert error:', error);  // <-- Burada hata detayını logla
-            res.status(500).json({ status: 'error', message: 'Kayıt eklenemedi.' });
+            res.status(500).json({ status: 'error', message: 'Kayıt eklenemedi.', error: error, error_message: error.message });
         }
     });
 
