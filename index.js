@@ -12,6 +12,7 @@ import methodPatProcess from './methods/pat-process.js';
 import methodPayment from './methods/payments.js';
 import methodStockMovements from './methods/stock-movments.js';
 import methodVaccine from './methods/vaccine.js';
+import methodsprovider from './methods/provider.js';
 import dotenv from 'dotenv';
 import path from 'path';
 import bodyParser from 'body-parser';
