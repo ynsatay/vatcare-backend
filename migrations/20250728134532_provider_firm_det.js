@@ -3,7 +3,7 @@
  * @returns { Promise<void> }
  */
 exports.up = function(knex) {
-  return knex.schema.createTable('provider_firm_det', function (table) {
+  return knex.schema.createTable('provider_firm_det', (table) => {
     table.increments('id').primary(); // Detay kaydı için ID
     table.integer('pf_id').unsigned().notNullable() // Provider firm ID
          .references('id').inTable('provider_firms')

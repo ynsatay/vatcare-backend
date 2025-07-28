@@ -3,7 +3,7 @@
  * @returns { Promise<void> }
  */
 exports.up = function(knex) {
-  return knex.schema.createTable('provider_firms', function (table) {
+  return knex.schema.createTable('provider_firms',  (table) => {
     table.increments('id').primary(); // Firma ID
     table.string('name').notNullable(); // Firma Adı
     table.string('contact_person'); // Kontak Kişi: Şimdilik kullanılmaycak.
