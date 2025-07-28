@@ -49,18 +49,22 @@ function methodPatProcess(app) {
             let material = null;
 
             if (row_type === 'M') {
-                material = await trx('materials')
-                    .where({ id: process_id })
-                    .first();
+                material = await trx('material_det')
+                    .where({ m_id: process_id, off_id })
+                    .decrement('quantity', count);
 
                 if (!material) {
                     await trx.rollback();
                     return res.status(404).json({ message: 'Materyal bulunamadı' });
                 }
 
-                if (material.quantity < count) {
+                const materialDet = await trx('material_det')
+                    .where({ m_id: process_id, off_id })
+                    .first();
+
+                if (!materialDet || materialDet.quantity < count) {
                     await trx.rollback();
-                    return res.status(400).json({ message: 'Yetersiz stok miktarı', available: material.quantity });
+                    return res.status(400).json({ message: 'Yetersiz stok miktarı', available: materialDet?.quantity || 0 });
                 }
             }
 
@@ -94,7 +98,7 @@ function methodPatProcess(app) {
                     movement_date: new Date(),
                     inv_type: 3,
                     created_at: new Date(),
-                    off_id : off_id
+                    off_id: off_id
                 });
             }
 
@@ -121,7 +125,7 @@ function methodPatProcess(app) {
                 feed_date: new Date(),
                 reference_table: 'patient_process',
                 reference_id: insertedId,
-                off_id : off_id
+                off_id: off_id
             }, trx);
 
             await trx.commit();
@@ -171,8 +175,8 @@ function methodPatProcess(app) {
                     .first();
 
                 if (movement) {
-                    await connection('materials')
-                        .where({ id: process.process_id })
+                    await connection('material_det')
+                        .where({ m_id: process.process_id, off_id })
                         .increment('quantity', movement.quantity);
 
                     await connection('material_movements')
