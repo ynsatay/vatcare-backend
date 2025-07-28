@@ -52,14 +52,18 @@ function methodProcess(app) {
     });
 
     app.get('/api/getMaterialsWithQuantity', authenticateToken, async (req, res) => {
+
         try {
+            const off_id = req.user.off_id;
             const materials = await connection('materials as m')
-                .leftJoin('material_det as md', 'm.id', 'md.material_id')
+                .leftJoin('material_det as md', function () {
+                    this.on('m.id', '=', 'md.m_id').andOn('md.off_id', '=', connection.raw('?', [off_id]));
+                })
                 .select(
                     'm.*',
                     connection.raw('COALESCE(SUM(md.quantity), 0) as total_quantity')
                 )
-                .groupBy('m.id'); // group by malzeme id'si (diğer tüm m.* alanlarının da group by'a dahil olması gerekebilir DB ayarına göre)
+                .groupBy('m.id');
 
             return res.status(200).json({
                 status: 'success',
