@@ -37,7 +37,6 @@ function methodPatProcess(app) {
     // 2️⃣ Malzeme veya hizmet ekleme
     app.post('/api/add-patient-process', authenticateToken, async (req, res) => {
         const trx = await connection.transaction();
-        const totalCount = 0;
         try {
             const off_id = req.user.off_id;
             const { pa_id, process_id, row_type, count, total_prices, unit_prices, ptime, note } = req.body;
@@ -82,11 +81,8 @@ function methodPatProcess(app) {
                 off_id
             });
 
-            
-
             if (row_type === 'M') {
                 // Stoktan düş
-                totalCount = totalCount + count;
                 await trx('material_det')
                     .where({ m_id: process_id, off_id })
                     .decrement('quantity', count);
@@ -133,7 +129,7 @@ function methodPatProcess(app) {
             }, trx);
 
             await trx.commit();
-            res.json({ id: insertedId, message: "İşlem başarıyla eklendi." + totalCount });
+            res.json({ id: insertedId, message: "İşlem başarıyla eklendi." });
 
         } catch (error) {
             await trx.rollback();
