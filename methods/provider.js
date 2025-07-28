@@ -123,8 +123,6 @@ function methodsprovider(app) {
         const { pf_id, material_id, purchase_price, vat_rate, is_default, active } = req.body;
 
         try {
-            // Eğer is_default true ise aynı malzeme için diğer kayıtların is_default false yapılabilir (opsiyonel)
-
             await knex('provider_firm_det').insert({
                 pf_id,
                 material_id,
@@ -138,7 +136,7 @@ function methodsprovider(app) {
 
             res.json({ status: 'success', message: 'Kayıt başarıyla eklendi.' });
         } catch (error) {
-            console.error(error);
+            console.error('Insert error:', error);  // <-- Burada hata detayını logla
             res.status(500).json({ status: 'error', message: 'Kayıt eklenemedi.' });
         }
     });
