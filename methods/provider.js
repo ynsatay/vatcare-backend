@@ -61,7 +61,6 @@ function methodsprovider(app) {
                     email,
                     address,
                     active,
-                    updated_at: connection.fn.now(),
                 });
 
             if (updatedRows === 0) {
@@ -119,24 +118,28 @@ function methodsprovider(app) {
     });
 
     // Yeni tedarikçi fiyat detayı ekle
-    app.post('/api/provider-price-create', authenticateToken, async (req, res) => {
+    app.put('/api/provider-price-update/:id', authenticateToken, async (req, res) => {
+        const { id } = req.params;
         const { pf_id, material_id, purchase_price, vat_rate, is_default, active } = req.body;
 
         try {
-            await connection('provider_firm_det').insert({
+            const affected = await connection('provider_firm_det').where('id', id).update({
                 pf_id,
                 material_id,
                 purchase_price,
                 vat_rate: vat_rate || 0,
                 is_default: is_default ? 1 : 0,
                 active: (active !== undefined) ? (active ? 1 : 0) : 1,
-                created_at: knex.fn.now(),
-                updated_at: knex.fn.now(),
             });
 
-            res.json({ status: 'success', message: 'Kayıt başarıyla eklendi.' });
+            if (affected === 0) {
+                return res.status(404).json({ status: 'error', message: 'Kayıt bulunamadı.' });
+            }
+
+            res.json({ status: 'success', message: 'Kayıt başarıyla güncellendi.' });
         } catch (error) {
-            res.status(500).json({ status: 'error', message: 'Kayıt eklenemedi.', error: error, error_message: error.message });
+            console.error(error);
+            res.status(500).json({ status: 'error', message: 'Güncelleme başarısız.', error: error.message });
         }
     });
 
@@ -152,7 +155,6 @@ function methodsprovider(app) {
                 vat_rate: vat_rate || 0,
                 is_default: is_default || false,
                 active: active !== undefined ? active : true,
-                updated_at: knex.fn.now(),
             });
 
             if (affected === 0) {
