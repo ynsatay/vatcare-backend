@@ -133,7 +133,7 @@ function methodPatProcess(app) {
             }, trx);
 
             await trx.commit();
-            res.json({ id: insertedId, message: "İşlem başarıyla eklendi.", totalCount });
+            res.json({ id: insertedId, message: "İşlem başarıyla eklendi." + totalCount });
 
         } catch (error) {
             await trx.rollback();
