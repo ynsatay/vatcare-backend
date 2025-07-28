@@ -243,7 +243,11 @@ function methods(app) {
                 sex: user[0].sex,
                 birthdate: user[0].birthdate,
                 address: user[0].address,
-                picture: profileImage
+                picture: profileImage,
+                username: user[0].uname,
+                identity: user[0].identity,
+                nationality: user[0].nationality,
+                pass_number: user[0].pass_number
             }
             return res.status(200).json({ status: 'success', user: response });
         }).catch((error) => {
