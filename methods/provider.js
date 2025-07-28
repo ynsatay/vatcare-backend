@@ -95,8 +95,6 @@ function methodsprovider(app) {
     });
 
 
-
-
     //Detay apileri
     app.get('/api/provider-price-list', authenticateToken, async (req, res) => {
         try {
