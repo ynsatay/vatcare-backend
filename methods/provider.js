@@ -117,11 +117,12 @@ function methodsprovider(app) {
         }
     });
 
-    app.post('/api/provider-price-create', authenticateToken, async (req, res) => {
+
+    app.post('/api/add-provider-price', authenticateToken, async (req, res) => {
         const { pf_id, material_id, purchase_price, vat_rate, is_default, active } = req.body;
 
         try {
-            await connection('provider_firm_det').insert({
+            const [id] = await connection('provider_firm_det').insert({
                 pf_id,
                 material_id,
                 purchase_price,
@@ -130,9 +131,11 @@ function methodsprovider(app) {
                 active: (active !== undefined) ? (active ? 1 : 0) : 1,
             });
 
-            res.json({ status: 'success', message: 'Kayıt başarıyla eklendi.' });
-        } catch (error) {
-            res.status(500).json({ status: 'error', message: 'Kayıt eklenemedi.', error: error, error_message: error.message });
+            res.json({ status: 'success', id });
+        }
+        catch (error) {
+            console.error(error);
+            res.status(500).json({ status: 'error', message: 'Kayıt oluşturulamadı.' });
         }
     });
 
