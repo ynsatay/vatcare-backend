@@ -95,8 +95,10 @@ function methodsprovider(app) {
     });
 
 
+
+
     //Detay apileri
-    app.get('/provider-price-list', authenticateToken, async (req, res) => {
+    app.get('/api/provider-price-list', authenticateToken, async (req, res) => {
         try {
             const data = await knex('provider_firm_det as pfd')
                 .select(
@@ -119,7 +121,7 @@ function methodsprovider(app) {
     });
 
     // Yeni tedarikçi fiyat detayı ekle
-    app.post('/provider-price-create', authenticateToken, async (req, res) => {
+    app.post('/api/provider-price-create', authenticateToken, async (req, res) => {
         const { pf_id, material_id, purchase_price, vat_rate, is_default, active } = req.body;
 
         try {
@@ -143,7 +145,7 @@ function methodsprovider(app) {
         }
     });
 
-    app.put('/provider-price-update/:id', authenticateToken, async (req, res) => {
+    app.put('/api/provider-price-update/:id', authenticateToken, async (req, res) => {
         const { id } = req.params;
         const { pf_id, material_id, purchase_price, vat_rate, is_default, active } = req.body;
 
@@ -169,7 +171,7 @@ function methodsprovider(app) {
         }
     });
 
-    app.delete('/provider-price-delete/:id', authenticateToken, async (req, res) => {
+    app.delete('/api/provider-price-delete/:id', authenticateToken, async (req, res) => {
         const { id } = req.params;
 
         try {
