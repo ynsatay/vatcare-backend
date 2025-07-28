@@ -100,6 +100,8 @@ function methodsprovider(app) {
             const data = await connection('provider_firm_det as pfd')
                 .select(
                     'pfd.id',
+                    'pfd.pf_id',
+                    'pfd.material_id',
                     'm.name as material_name',
                     'pf.name as provider_firm_name',
                     'pfd.purchase_price',
