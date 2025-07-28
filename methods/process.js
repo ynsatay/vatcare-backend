@@ -51,6 +51,59 @@ function methodProcess(app) {
         }
     });
 
+    //Stok Lsitesini (Alım Fiyatı ile)
+    app.get('/api/getMaterialsWithPrice', authenticateToken, async (req, res) => {
+        try {
+            const off_id = req.user.off_id;
+
+            const subQuery = connection('provider_firm_det')
+                .select(
+                    'id',
+                    'material_id',
+                    'pf_id',
+                    'purchase_price',
+                    'vat_rate',
+                    'is_default',
+                    'active',
+                    'off_id',
+                    connection.raw(`
+          ROW_NUMBER() OVER (
+            PARTITION BY material_id
+            ORDER BY is_default DESC, id DESC
+          ) as rn
+        `)
+                )
+                .where('off_id', off_id)
+                .as('pfd_ranked');
+
+            const materialsWithPrice = await connection('materials as m')
+                .leftJoin(subQuery, function () {
+                    this.on('m.id', '=', 'pfd_ranked.material_id')
+                        .andOn('pfd_ranked.rn', '=', 1); // sadece ilk sıradakini alıyoruz
+                })
+                .leftJoin('provider_firms as pf', 'pfd_ranked.pf_id', 'pf.id')
+                .select(
+                    'm.id',
+                    'm.name',
+                    'm.unit',
+                    'pfd_ranked.purchase_price',
+                    'pfd_ranked.vat_rate',
+                    'pfd_ranked.is_default',
+                    'pfd_ranked.active',
+                    'pf.name as provider_firm_name',
+                    'pfd_ranked.id as provider_firm_det_id'
+                );
+
+            return res.status(200).json({
+                status: 'success',
+                data: materialsWithPrice,
+            });
+        } catch (error) {
+            console.error('Database error:', error);
+            return res.status(500).json({ error: 'Database error', status: 'error' });
+        }
+    });
+
     app.delete('/api/deleteMaterial/:id', authenticateToken, async (req, res) => {
         const id = req.params.id;
         try {
