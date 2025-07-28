@@ -128,8 +128,8 @@ function methodsprovider(app) {
                 material_id,
                 purchase_price,
                 vat_rate: vat_rate || 0,
-                is_default: is_default || false,
-                active: active !== undefined ? active : true,
+                is_default: is_default ? 1 : 0,
+                active: (active !== undefined) ? (active ? 1 : 0) : 1,
                 created_at: knex.fn.now(),
                 updated_at: knex.fn.now(),
             });
