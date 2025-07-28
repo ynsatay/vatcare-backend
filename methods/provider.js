@@ -118,12 +118,11 @@ function methodsprovider(app) {
     });
 
     // Yeni tedarikçi fiyat detayı ekle
-    app.put('/api/provider-price-update/:id', authenticateToken, async (req, res) => {
-        const { id } = req.params;
+    app.post('/api/provider-price-create', authenticateToken, async (req, res) => {
         const { pf_id, material_id, purchase_price, vat_rate, is_default, active } = req.body;
 
         try {
-            const affected = await connection('provider_firm_det').where('id', id).update({
+            await connection('provider_firm_det').insert({
                 pf_id,
                 material_id,
                 purchase_price,
@@ -132,14 +131,9 @@ function methodsprovider(app) {
                 active: (active !== undefined) ? (active ? 1 : 0) : 1,
             });
 
-            if (affected === 0) {
-                return res.status(404).json({ status: 'error', message: 'Kayıt bulunamadı.' });
-            }
-
-            res.json({ status: 'success', message: 'Kayıt başarıyla güncellendi.' });
+            res.json({ status: 'success', message: 'Kayıt başarıyla eklendi.' });
         } catch (error) {
-            console.error(error);
-            res.status(500).json({ status: 'error', message: 'Güncelleme başarısız.', error: error.message });
+            res.status(500).json({ status: 'error', message: 'Kayıt eklenemedi.', error: error, error_message: error.message });
         }
     });
 
