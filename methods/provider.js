@@ -95,6 +95,98 @@ function methodsprovider(app) {
     });
 
 
+    //Detay apileri
+    app.get('/provider-firm-det', authenticateToken, async (req, res) => {
+        try {
+            const data = await knex('provider_firm_det as pfd')
+                .select(
+                    'pfd.id',
+                    'm.name as material_name',
+                    'pf.name as provider_firm_name',
+                    'pfd.purchase_price',
+                    'pfd.vat_rate',
+                    'pfd.is_default',
+                    'pfd.active'
+                )
+                .leftJoin('materials as m', 'pfd.material_id', 'm.id')
+                .leftJoin('provider_firms as pf', 'pfd.pf_id', 'pf.id');
+
+            res.json({ status: 'success', firms: data });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ status: 'error', message: 'Liste getirilemedi.' });
+        }
+    });
+
+    // Yeni tedarikçi fiyat detayı ekle
+    app.post('/provider-firm-det', authenticateToken, async (req, res) => {
+        const { pf_id, material_id, purchase_price, vat_rate, is_default, active } = req.body;
+
+        try {
+            // Eğer is_default true ise aynı malzeme için diğer kayıtların is_default false yapılabilir (opsiyonel)
+
+            await knex('provider_firm_det').insert({
+                pf_id,
+                material_id,
+                purchase_price,
+                vat_rate: vat_rate || 0,
+                is_default: is_default || false,
+                active: active !== undefined ? active : true,
+                created_at: knex.fn.now(),
+                updated_at: knex.fn.now(),
+            });
+
+            res.json({ status: 'success', message: 'Kayıt başarıyla eklendi.' });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ status: 'error', message: 'Kayıt eklenemedi.' });
+        }
+    });
+
+    app.put('/provider-firm-det/:id', authenticateToken, async (req, res) => {
+        const { id } = req.params;
+        const { pf_id, material_id, purchase_price, vat_rate, is_default, active } = req.body;
+
+        try {
+            const affected = await knex('provider_firm_det').where('id', id).update({
+                pf_id,
+                material_id,
+                purchase_price,
+                vat_rate: vat_rate || 0,
+                is_default: is_default || false,
+                active: active !== undefined ? active : true,
+                updated_at: knex.fn.now(),
+            });
+
+            if (affected === 0) {
+                return res.status(404).json({ status: 'error', message: 'Kayıt bulunamadı.' });
+            }
+
+            res.json({ status: 'success', message: 'Kayıt başarıyla güncellendi.' });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ status: 'error', message: 'Güncelleme başarısız.' });
+        }
+    });
+
+    app.delete('/provider-firm-det/:id', authenticateToken, async (req, res) => {
+        const { id } = req.params;
+
+        try {
+            const deleted = await knex('provider_firm_det').where('id', id).del();
+
+            if (deleted === 0) {
+                return res.status(404).json({ status: 'error', message: 'Kayıt bulunamadı.' });
+            }
+
+            res.json({ status: 'success', message: 'Kayıt başarıyla silindi.' });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ status: 'error', message: 'Silme başarısız.' });
+        }
+    });
+
+
 
 }
 
