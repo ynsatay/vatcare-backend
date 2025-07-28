@@ -49,9 +49,9 @@ function methodPatProcess(app) {
             let material = null;
 
             if (row_type === 'M') {
-                material = await trx('material_det')
-                    .where({ m_id: process_id, off_id })
-                    .decrement('quantity', count);
+                material = await trx('materials')
+                    .where({ id: process_id })
+                    .first();
 
                 if (!material) {
                     await trx.rollback();
