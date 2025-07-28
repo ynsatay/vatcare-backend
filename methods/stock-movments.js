@@ -297,9 +297,7 @@ function methodStockMovements(app) {
                         await trx("material_det").insert({
                             off_id,
                             m_id,
-                            quantity,
-                            tax_rate: 0,
-                            note: null
+                            quantity
                         });
                     }
                 } else {
