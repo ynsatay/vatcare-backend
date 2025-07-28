@@ -2,7 +2,7 @@ import connection from "../knex/connection.js";
 import authenticateToken from "./Middleware/index.js";
 
 function methodsprovider(app) {
-    app.get('/api/provider_firms', authenticateToken, async (req, res) => {
+    app.get('/api/provider-firms', authenticateToken, async (req, res) => {
         const off_id = req.user.off_id; // Eğer off_id kullanıyorsanız
         const { search } = req.query; // arama sorgusu opsiyonel
 
@@ -74,6 +74,26 @@ function methodsprovider(app) {
             res.status(500).json({ error: 'Firma güncellenirken hata oluştu.' });
         }
     });
+
+    app.delete('/api/del-provider-firms/:id', authenticateToken, async (req, res) => {
+        const { id } = req.params;
+
+        try {
+            const firm = await connection('provider_firms').where({ id }).first();
+
+            if (!firm) {
+                return res.status(404).json({ message: 'Firma bulunamadı' });
+            }
+
+            await connection('provider_firms').where({ id }).del();
+
+            res.status(200).json({ message: 'Firma başarıyla silindi' });
+        } catch (error) {
+            console.error('Firma silme hatası:', error);
+            res.status(500).json({ message: 'Firma silinirken bir hata oluştu' });
+        }
+    });
+
 
 
 }
