@@ -98,7 +98,7 @@ function methodsprovider(app) {
     //Detay apileri
     app.get('/api/provider-price-list', authenticateToken, async (req, res) => {
         try {
-            const data = await knex('provider_firm_det as pfd')
+            const data = await connection('provider_firm_det as pfd')
                 .select(
                     'pfd.id',
                     'm.name as material_name',
@@ -123,7 +123,7 @@ function methodsprovider(app) {
         const { pf_id, material_id, purchase_price, vat_rate, is_default, active } = req.body;
 
         try {
-            await knex('provider_firm_det').insert({
+            await connection('provider_firm_det').insert({
                 pf_id,
                 material_id,
                 purchase_price,
@@ -145,7 +145,7 @@ function methodsprovider(app) {
         const { pf_id, material_id, purchase_price, vat_rate, is_default, active } = req.body;
 
         try {
-            const affected = await knex('provider_firm_det').where('id', id).update({
+            const affected = await connection('provider_firm_det').where('id', id).update({
                 pf_id,
                 material_id,
                 purchase_price,
@@ -170,7 +170,7 @@ function methodsprovider(app) {
         const { id } = req.params;
 
         try {
-            const deleted = await knex('provider_firm_det').where('id', id).del();
+            const deleted = await connection('provider_firm_det').where('id', id).del();
 
             if (deleted === 0) {
                 return res.status(404).json({ status: 'error', message: 'Kayıt bulunamadı.' });
