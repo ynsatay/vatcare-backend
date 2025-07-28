@@ -1,4 +1,3 @@
-import express from 'express';
 import connection from "../knex/connection.js";
 import authenticateToken from './Middleware/index.js';
 
@@ -68,14 +67,14 @@ function methodStockMovements(app) {
                 return res.status(404).json({ message: "Fatura bulunamadı veya yetkiniz yok." });
             }
 
-            // Eğer stok çıkışıysa, önce stoğu kontrol et
+            // Stok giriş/çıkış kontrolü ve güncellemesi material_det tablosuna göre olacak
+            const materialDet = await trx("material_det")
+                .where({ off_id, m_id })
+                .first();
+
             if (inv_type !== 1) {
-                const material = await trx("materials").where("id", m_id).first();
-                if (!material) {
-                    await trx.rollback();
-                    return res.status(404).json({ message: "Malzeme bulunamadı" });
-                }
-                if (material.quantity < quantity) {
+                // stok çıkışıysa stok yeterlilik kontrolü
+                if (!materialDet || materialDet.quantity < quantity) {
                     await trx.rollback();
                     return res.status(400).json({ message: "Depo bakiyesi eksiye düşecektir. İşleminiz iptal edildi." });
                 }
@@ -95,9 +94,21 @@ function methodStockMovements(app) {
 
             // Stok miktarını güncelle
             if (inv_type === 1) {
-                await trx("materials").where("id", m_id).increment("quantity", quantity);
+                // Stok artır
+                if (materialDet) {
+                    await trx("material_det").where({ id: materialDet.id }).increment("quantity", quantity);
+                } else {
+                    await trx("material_det").insert({
+                        off_id,
+                        m_id,
+                        quantity,
+                        tax_rate: 0,  // istersen değiştirilebilir
+                        note: null
+                    });
+                }
             } else {
-                await trx("materials").where("id", m_id).decrement("quantity", quantity);
+                // Stok azalt
+                await trx("material_det").where({ id: materialDet.id }).decrement("quantity", quantity);
             }
 
             await trx.commit();
@@ -249,13 +260,16 @@ function methodStockMovements(app) {
                     return res.status(400).json({ message: "Eksik hareket alanları." });
                 }
 
+                const materialDet = await trx("material_det")
+                    .where({ off_id, m_id })
+                    .first();
+
                 if (inv_type !== 1) { // stok çıkışıysa
-                    const material = await trx("materials").where("id", m_id).first();
-                    if (!material) {
+                    if (!materialDet) {
                         await trx.rollback();
                         return res.status(404).json({ message: `Malzeme ${m_id} bulunamadı` });
                     }
-                    if (material.quantity < quantity) {
+                    if (materialDet.quantity < quantity) {
                         await trx.rollback();
                         return res.status(400).json({ message: "Depo bakiyesi eksiye düşecektir. İşlem iptal edildi." });
                     }
@@ -273,9 +287,19 @@ function methodStockMovements(app) {
                 });
 
                 if (inv_type === 1) {
-                    await trx("materials").where("id", m_id).increment("quantity", quantity);
+                    if (materialDet) {
+                        await trx("material_det").where({ id: materialDet.id }).increment("quantity", quantity);
+                    } else {
+                        await trx("material_det").insert({
+                            off_id,
+                            m_id,
+                            quantity,
+                            tax_rate: 0,
+                            note: null
+                        });
+                    }
                 } else {
-                    await trx("materials").where("id", m_id).decrement("quantity", quantity);
+                    await trx("material_det").where({ id: materialDet.id }).decrement("quantity", quantity);
                 }
             }
 
