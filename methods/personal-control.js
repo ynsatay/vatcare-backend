@@ -246,15 +246,13 @@ function MethodPersoneSearch(app) {
                 .sum({ total: 'total_prices' })
                 .first();
 
-            const totalProcess = parseFloat(processSumRow.total || 0);
+            const totalProcess = Number(processSumRow[0]?.total) || 0;
 
             // 3. patient_revenues tablosundan toplam tahsilatı al
             const revenueSumRow = await connection('patient_revenues')
                 .where({ pa_id: paId, is_refund: false })
-                .sum({ total: 'amount' })
-                .first();
-
-            const totalRevenue = parseFloat(revenueSumRow.total || 0);
+                .sum({ total: 'amount' });
+            const totalRevenue = Number(revenueSumRow[0]?.total) || 0;
 
             const remaining = totalProcess - totalRevenue;
 
