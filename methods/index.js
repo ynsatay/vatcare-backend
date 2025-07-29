@@ -360,7 +360,7 @@ function methods(app) {
         try {
             await sendMail({
                 to: "ynsmratay@gmail.com",
-                subject: 'Yeni Demo Talebi',
+                subject: 'Yeni Talep',
                 html: `
         <h2>📩 Yeni Talep</h2>
         <p><strong>👤 Ad Soyad:</strong> ${name}</p>
