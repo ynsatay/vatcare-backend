@@ -36,23 +36,27 @@ function methodsanimals(app) {
     app.get('/api/animalslist', authenticateToken, (req, res) => {
         const { user_id } = req.query;
         const offId = req.user.off_id;
-        connection
+
+        let query = connection
             .select('users_animals.*')
             .select('users_animals.id as data_id')
             .select('animals.name as animal_name')
             .select('animals_species.species_name as species_name')
             .select('animals_species.id as species_id')
-            .select(connection.raw('DATE_FORMAT(users_animals.birthdate, "%Y-%m-%d") as birthdate')) // Yıl-ay-gün formatı için
-            .select(connection.raw('DATE_FORMAT(users_animals.deathdate, "%Y-%m-%d") as deathdate')) // Yıl-ay-gün formatı için
+            .select(connection.raw('DATE_FORMAT(users_animals.birthdate, "%Y-%m-%d") as birthdate'))
+            .select(connection.raw('DATE_FORMAT(users_animals.deathdate, "%Y-%m-%d") as deathdate'))
             .select('users.name as user_name')
             .from('users_animals')
             .join('animals', 'users_animals.animal_id', 'animals.id')
             .join('animals_species', 'users_animals.animal_species_id', 'animals_species.id')
             .join('users', 'users_animals.user_id', 'users.id')
-            .where('users_animals.user_id', user_id).orWhere(user_id == null)
-            .andWhere('users_animals.off_id', offId)
-            .then((animal) => {
+            .where('users_animals.off_id', offId);
 
+        if (user_id) {
+            query = query.andWhere('users_animals.user_id', user_id);
+        }
+
+        query.then((animal) => {
                 return res.status(200).json({ status: 'success', response: animal });
             })
             .catch((err) => {
@@ -162,7 +166,7 @@ function methodsanimals(app) {
                 active: 1,
                 isdeath,
                 animalname,
-                off_id: offId 
+                off_id: offId
             });
 
             console.log("Hayvan adı veritabanına eklendi:", animalname);
