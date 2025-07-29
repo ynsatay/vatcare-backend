@@ -226,6 +226,34 @@ function MethodPersoneSearch(app) {
                 return res.status(500).json({ error: 'Sunucu hatası', status: 'error' });
             });
     });
+
+    app.put('/api/patient-arrival/:id/discharge', authenticateToken, async (req, res) => {
+        try {
+            await connection("patient_arrivals")
+                .where("id", req.params.id)
+                .update({
+                    is_discharge: true,
+                    discharge_time: new Date(),
+                });
+            res.json({ message: "Çıkış yapıldı." });
+        } catch (err) {
+            res.status(500).json({ message: "Çıkış yapılamadı." });
+        }
+    });
+
+    app.put('/api/patient-arrival/:id/undo-discharge', authenticateToken, async (req, res) => {
+        try {
+            await connection("patient_arrivals")
+                .where("id", req.params.id)
+                .update({
+                    is_discharge: false,
+                    discharge_time: null
+                });
+            res.json({ message: "Çıkış iptal edildi." });
+        } catch (err) {
+            res.status(500).json({ message: "Çıkış iptali yapılamadı." });
+        }
+    });
 }
 
 export default MethodPersoneSearch;
