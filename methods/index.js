@@ -369,7 +369,16 @@ function methods(app) {
     <p><strong>📦 Plan:</strong> ${plan}</p>
     <p><strong>📝 Mesaj:</strong> ${message?.trim() || 'Belirtilmedi'}</p>
     <br/>
-    <p>Lütfen en kısa sürede kullanıcıyla iletişime geçiniz.</p>
+    <p style="color: #555;">Lütfen en kısa sürede kullanıcıyla iletişime geçiniz.</p>
+  `,
+                text: `
+    Yeni bir demo talebi alındı:
+
+    Ad Soyad : ${name}
+    E-posta  : ${email}
+    Telefon  : ${phone}
+    Plan     : ${plan}
+    Mesaj    : ${message?.trim() || 'Belirtilmedi'}
   `
             });
 
