@@ -228,16 +228,56 @@ function MethodPersoneSearch(app) {
     });
 
     app.put('/api/patient-arrival/:id/discharge', authenticateToken, async (req, res) => {
+        const arrivalId = req.params.id;
+
         try {
-            await connection("patient_arrivals")
-                .where("id", req.params.id)
+            // 1. Geliş kaydını al
+            const arrival = await connection('patient_arrivals').where({ id: arrivalId }).first();
+
+            if (!arrival) {
+                return res.status(404).json({ message: "Geliş kaydı bulunamadı." });
+            }
+
+            const paId = arrival.id;
+
+            // 2. patient_process tablosundan toplam işlem tutarını al
+            const processSumRow = await connection('patient_process')
+                .where({ pa_id: paId })
+                .sum({ total: 'total_prices' })
+                .first();
+
+            const totalProcess = parseFloat(processSumRow.total || 0);
+
+            // 3. patient_revenues tablosundan toplam tahsilatı al
+            const revenueSumRow = await connection('patient_revenues')
+                .where({ pa_id: paId, is_refund: false })
+                .sum({ total: 'amount' })
+                .first();
+
+            const totalRevenue = parseFloat(revenueSumRow.total || 0);
+
+            const remaining = totalProcess - totalRevenue;
+
+            // 4. Borç kontrolü
+            if (remaining > 0.01) {
+                return res.status(400).json({
+                    message: `Hastanın ${remaining.toFixed(2)} ₺ borcu bulunmaktadır. Çıkış yapılamaz.`
+                });
+            }
+
+            // 5. Çıkışı tamamla
+            await connection('patient_arrivals')
+                .where({ id: arrivalId })
                 .update({
                     is_discharge: true,
-                    discharge_time: new Date(),
+                    discharge_time: new Date()
                 });
-            res.json({ message: "Çıkış yapıldı." });
+
+            res.json({ message: "Çıkış başarıyla yapıldı." });
+
         } catch (err) {
-            res.status(500).json({ message: "Çıkış yapılamadı." });
+            console.error("Çıkış hatası:", err);
+            res.status(500).json({ message: "Çıkış sırasında sunucu hatası oluştu." });
         }
     });
 
