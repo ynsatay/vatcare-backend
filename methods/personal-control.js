@@ -240,21 +240,22 @@ function MethodPersoneSearch(app) {
 
             const paId = arrival.id;
 
-            // 2. patient_process tablosundan toplam işlem tutarını al
-            const processSumRow = await connection('patient_process')
-                .where({ pa_id: paId })
-                .sum({ total: 'total_prices' })
+            const totalResult = await connection("patient_process")
+                .where({ pa_id : paId })
+                .sum("total_prices as total")
                 .first();
 
-            const totalProcess = Number(processSumRow[0]?.total) || 0;
+            const total = Number(totalResult.total) || 0;
 
-            // 3. patient_revenues tablosundan toplam tahsilatı al
-            const revenueSumRow = await connection('patient_revenues')
-                .where({ pa_id: paId, is_refund: false })
-                .sum({ total: 'amount' });
-            const totalRevenue = Number(revenueSumRow[0]?.total) || 0;
+            const paidResult = await connection("patient_revenues as pr")
+                .join("patient_revenue_det as det", "pr.id", "det.revenue_id")
+                .where("pr.pa_id", paId)
+                .sum("det.amount as paid")
+                .first();
 
-            const remaining = totalProcess - totalRevenue;
+            const paidTotal = Number(paidResult.paid) || 0;
+
+            const remaining = total - paidTotal;
 
             // 4. Borç kontrolü
             if (remaining > 0.01) {
