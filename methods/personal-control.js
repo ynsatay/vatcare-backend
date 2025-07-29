@@ -257,14 +257,12 @@ function MethodPersoneSearch(app) {
 
             const remaining = total - paidTotal;
 
-            // 4. Borç kontrolü
             if (remaining > 0.01) {
                 return res.status(400).json({
                     message: `Hastanın ${remaining.toFixed(2)} ₺ borcu bulunmaktadır. Çıkış yapılamaz.`
                 });
             }
 
-            // 5. Çıkışı tamamla
             await connection('patient_arrivals')
                 .where({ id: arrivalId })
                 .update({

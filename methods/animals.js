@@ -49,7 +49,7 @@ function methodsanimals(app) {
             .join('animals', 'users_animals.animal_id', 'animals.id')
             .join('animals_species', 'users_animals.animal_species_id', 'animals_species.id')
             .join('users', 'users_animals.user_id', 'users.id')
-            .where('users_animals.user_id', user_id)
+            .where('users_animals.user_id', user_id).orWhere(user_id == null)
             .andWhere('users_animals.off_id', offId)
             .then((animal) => {
 
