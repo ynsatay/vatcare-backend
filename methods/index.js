@@ -362,24 +362,24 @@ function methods(app) {
                 to: "ynsmratay@gmail.com",
                 subject: 'Yeni Demo Talebi',
                 html: `
-    <h2>📩 Yeni Demo Talebi</h2>
-    <p><strong>👤 Ad Soyad:</strong> ${name}</p>
-    <p><strong>📧 E-posta:</strong> ${email}</p>
-    <p><strong>📞 Telefon:</strong> ${phone}</p>
-    <p><strong>📦 Plan:</strong> ${plan}</p>
-    <p><strong>📝 Mesaj:</strong> ${message?.trim() || 'Belirtilmedi'}</p>
-    <br/>
-    <p style="color: #555;">Lütfen en kısa sürede kullanıcıyla iletişime geçiniz.</p>
-  `,
+        <h2>📩 Yeni Demo Talebi</h2>
+        <p><strong>👤 Ad Soyad:</strong> ${name}</p>
+        <p><strong>📧 E-posta:</strong> ${email}</p>
+        <p><strong>📞 Telefon:</strong> ${phone}</p>
+        <p><strong>📦 Plan:</strong> ${plan}</p>
+        <p><strong>📝 Mesaj:</strong> ${message?.trim() || 'Belirtilmedi'}</p>
+        <br/>
+        <p style="color: #555;">Lütfen en kısa sürede kullanıcıyla iletişime geçiniz.</p>
+      `,
                 text: `
-    Yeni bir demo talebi alındı:
+Yeni bir demo talebi alındı:
 
-    Ad Soyad : ${name}
-    E-posta  : ${email}
-    Telefon  : ${phone}
-    Plan     : ${plan}
-    Mesaj    : ${message?.trim() || 'Belirtilmedi'}
-  `
+Ad Soyad : ${name}
+E-posta  : ${email}
+Telefon  : ${phone}
+Plan     : ${plan}
+Mesaj    : ${message?.trim() || 'Belirtilmedi'}
+      `
             });
 
             res.status(200).json({ success: true, message: 'Demo talebi gönderildi' });
