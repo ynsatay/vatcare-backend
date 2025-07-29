@@ -14,7 +14,7 @@ const upload = multer({ storage: storage });
 function methods(app) {
     //Giriş İşlemleri
     app.post('/api/login', (req, res) => {
-        const { username, password, office_id  } = req.body;
+        const { username, password, office_id } = req.body;
 
         if (!username || !password) {
             return res.status(400).json({ error: 'Kullanıcı adı ve şifre gereklidir', status: 'error' });
@@ -24,7 +24,7 @@ function methods(app) {
             .where(function () {
                 this.where('uname', username).orWhere('email', username);
             })
-            .andWhere('off_id', office_id )
+            .andWhere('off_id', office_id)
             .first()
             .then((user) => {
                 if (!user) {
@@ -360,13 +360,17 @@ function methods(app) {
         try {
             await sendMail({
                 to: "ynsmratay@gmail.com",
-                subject: 'Demo Talebi',
-                text: `İsim: ${name}
-                       E-posta: ${email}
-                       Telefon: ${phone}
-                       Plan: ${plan}
-                       Mesaj: ${message || '—'}
-                    `,
+                subject: 'Yeni Demo Talebi',
+                html: `
+    <h2>📩 Yeni Demo Talebi</h2>
+    <p><strong>👤 Ad Soyad:</strong> ${name}</p>
+    <p><strong>📧 E-posta:</strong> ${email}</p>
+    <p><strong>📞 Telefon:</strong> ${phone}</p>
+    <p><strong>📦 Plan:</strong> ${plan}</p>
+    <p><strong>📝 Mesaj:</strong> ${message?.trim() || 'Belirtilmedi'}</p>
+    <br/>
+    <p>Lütfen en kısa sürede kullanıcıyla iletişime geçiniz.</p>
+  `
             });
 
             res.status(200).json({ success: true, message: 'Demo talebi gönderildi' });
