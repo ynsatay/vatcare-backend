@@ -362,7 +362,7 @@ function methods(app) {
                 to: "ynsmratay@gmail.com",
                 subject: 'Yeni Demo Talebi',
                 html: `
-        <h2>📩 Yeni Demo Talebi</h2>
+        <h2>📩 Yeni Talep</h2>
         <p><strong>👤 Ad Soyad:</strong> ${name}</p>
         <p><strong>📧 E-posta:</strong> ${email}</p>
         <p><strong>📞 Telefon:</strong> ${phone}</p>
@@ -372,7 +372,7 @@ function methods(app) {
         <p style="color: #555;">Lütfen en kısa sürede kullanıcıyla iletişime geçiniz.</p>
       `,
                 text: `
-Yeni bir demo talebi alındı:
+Yeni bir talep alındı:
 
 Ad Soyad : ${name}
 E-posta  : ${email}
