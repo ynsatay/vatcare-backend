@@ -292,7 +292,7 @@ function MethodPersoneSearch(app) {
         }
     });
 
-    app.get('/customerslist', authenticateToken, async (req, res) => {
+    app.get('/api/customerslist', authenticateToken, async (req, res) => {
         try {
             const off_id = req.user.off_id; 
 
