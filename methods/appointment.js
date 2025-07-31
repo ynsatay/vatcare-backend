@@ -4,7 +4,6 @@ import logFeed from './utils/logFeed.js';
 import { deleteFeedWithReference } from './utils/deleteFeed.js';
 
 function methodappointment(app) {
-    const moment = require('moment'); 
     app.post('/api/addappointment', authenticateToken, async (req, res) => {
         try {
             const off_id = req.user.off_id;
@@ -32,7 +31,7 @@ function methodappointment(app) {
                 notes: notes || null,
                 status: status || 0,
                 app_type: app_type || 0,
-                off_id,
+                off_id, 
             });
 
             const userAnimal = await connection('users_animals')
@@ -48,7 +47,7 @@ function methodappointment(app) {
                 feed_date: new Date(),
                 reference_table: 'appointment_process',
                 reference_id: insertedId,
-                off_id,
+                off_id, 
             });
 
             res.status(200).json({ status: 'success', message: 'Randevu başarıyla eklendi.' });
@@ -64,7 +63,7 @@ function methodappointment(app) {
         connection('users_animals')
             .join('users', 'users.id', 'users_animals.user_id')
             .select('users_animals.*', 'users.name')
-            .where('users_animals.off_id', off_id)
+            .where('users_animals.off_id', off_id) 
             .then((animals) => {
                 if (animals.length === 0) {
                     return res.status(404).json({ error: 'Hayvan bulunamadı', status: 'error' });
@@ -89,31 +88,19 @@ function methodappointment(app) {
                 'users.id as user_id',
                 'users_animals.animalname as animal_name'
             )
-            .where('appointment_process.off_id', off_id)
+            .where('appointment_process.off_id', off_id) 
             .orderBy('appointment_process.start_time', 'desc')
             .then((appointments) => {
                 if (appointments.length === 0) {
                     return res.status(404).json({ error: 'Randevu bulunamadı', status: 'error' });
                 }
-
-                // Tarihleri ISO formatına çeviriyoruz (UTC zaman dilimi)
-                const appointmentsUTC = appointments.map(app => ({
-                    ...app,
-                    start_time: moment(app.start_time).utc().toISOString(),
-                    end_time: moment(app.end_time).utc().toISOString(),
-                    process_date: moment(app.process_date).utc().toISOString(),
-                    created_at: moment(app.created_at).utc().toISOString(),
-                    updated_at: moment(app.updated_at).utc().toISOString(),
-                }));
-
-                return res.status(200).json({ status: 'success', data: appointmentsUTC });
+                return res.status(200).json({ status: 'success', data: appointments });
             })
             .catch(err => {
                 console.error(err);
                 return res.status(500).json({ error: 'Sunucu hatası', status: 'error' });
             });
     });
-
 
     app.post('/api/updateappointment', authenticateToken, (req, res) => {
         const off_id = req.user.off_id;
@@ -124,7 +111,7 @@ function methodappointment(app) {
         }
 
         connection('appointment_process')
-            .where({ id, off_id })
+            .where({ id, off_id }) 
             .update({
                 start_time,
                 end_time,
@@ -149,14 +136,14 @@ function methodappointment(app) {
 
         try {
             const feed = await connection('feeds')
-                .where({ reference_table: 'appointment_process', reference_id: id, off_id })
+                .where({ reference_table: 'appointment_process', reference_id: id, off_id }) 
                 .first();
 
             if (feed) {
-                await deleteFeedWithReference(feed.id, off_id);
+                await deleteFeedWithReference(feed.id, off_id); 
             } else {
                 const deletedCount = await connection('appointment_process')
-                    .where({ id, off_id })
+                    .where({ id, off_id }) 
                     .del();
 
                 if (deletedCount === 0) {
