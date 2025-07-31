@@ -140,7 +140,7 @@ function methodappointment(app) {
                 .first();
 
             if (feed) {
-                await deleteFeedWithReference(feed.id); 
+                await deleteFeedWithReference(feed.id, off_id); 
             } else {
                 const deletedCount = await connection('appointment_process')
                     .where({ id, off_id }) 
