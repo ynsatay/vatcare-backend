@@ -241,7 +241,7 @@ function MethodPersoneSearch(app) {
             const paId = arrival.id;
 
             const totalResult = await connection("patient_process")
-                .where({ pa_id : paId })
+                .where({ pa_id: paId })
                 .sum("total_prices as total")
                 .first();
 
@@ -289,6 +289,34 @@ function MethodPersoneSearch(app) {
             res.json({ message: "Çıkış iptal edildi." });
         } catch (err) {
             res.status(500).json({ message: "Çıkış iptali yapılamadı." });
+        }
+    });
+
+    app.get('/customerslist', authenticateToken, async (req, res) => {
+        try {
+            const off_id = req.user.off_id; 
+
+            const customers = await connection('users')
+                .where({
+                    role: '1', 
+                    off_id: off_id,
+                    active: true
+                })
+                .select(
+                    'id',
+                    'name',
+                    'surname',
+                    'phone',
+                    'email',
+                    'address',
+                    'identity'
+                )
+                .orderBy('id', 'desc');
+
+            res.json({ success: true, response: customers });
+        } catch (error) {
+            console.error('Müşteri listesi alınamadı:', error);
+            res.status(500).json({ success: false, message: 'Sunucu hatası' });
         }
     });
 }
