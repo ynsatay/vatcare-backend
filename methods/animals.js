@@ -61,7 +61,7 @@ function methodsanimals(app) {
             })
             .catch((err) => {
                 console.error('Veritabanı hatası:', err);
-                res.status(500).json({ error: 'Veritabanı hatası' + offId + user_id, status: 'error' });
+                res.status(500).json({ error: 'Veritabanı hatası', status: 'error' });
             });
     });
 
