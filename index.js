@@ -18,7 +18,9 @@ import path from 'path';
 import bodyParser from 'body-parser';
 import './services/mailReminder.js';
 
-dotenv.config({ path: path.resolve('../.env') }); // gerekirse './.env' de olabilir
+//dotenv.config({ path: path.resolve('../.env') }); // gerekirse './.env' de olabilir
+dotenv.config({ path: path.resolve('./.env') });
+
 
 const app = express();
 const port = process.env.PORT;
