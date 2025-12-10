@@ -360,26 +360,51 @@ function methods(app) {
         try {
             await sendMail({
                 to: "ynsmratay@gmail.com",
-                subject: 'Yeni Talep',
+                subject: 'VetCare | Yeni Demo Talebi',
                 html: `
-        <h2>📩 Yeni Talep</h2>
-        <p><strong>👤 Ad Soyad:</strong> ${name}</p>
-        <p><strong>📧 E-posta:</strong> ${email}</p>
-        <p><strong>📞 Telefon:</strong> ${phone}</p>
-        <p><strong>📦 Plan:</strong> ${plan}</p>
-        <p><strong>📝 Mesaj:</strong> ${message?.trim() || 'Belirtilmedi'}</p>
-        <br/>
-        <p style="color: #555;">Lütfen en kısa sürede kullanıcıyla iletişime geçiniz.</p>
-      `,
+          <div style="font-family:'Segoe UI',Arial,sans-serif;background:#f4f5fb;padding:24px;">
+            <div style="max-width:640px;margin:0 auto;background:#ffffff;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,0.06);overflow:hidden;border:1px solid #eef0f6;">
+              <div style="background:linear-gradient(135deg,#59018b,#7a1fa8);padding:18px 22px;color:#fff;">
+                <div style="font-size:19px;font-weight:700;">📩 Yeni Demo Talebi</div>
+                <div style="opacity:0.85;font-size:13px;">Landing formundan iletildi</div>
+              </div>
+              <div style="padding:22px; color:#111827; display:grid; row-gap:12px; column-gap:8px; font-size:15px;">
+                <div style="display:grid;grid-template-columns:130px 1fr;align-items:center;">
+                  <div style="font-weight:600;color:#6b7280;">👤 Ad Soyad</div><div>${name}</div>
+                </div>
+                <div style="display:grid;grid-template-columns:130px 1fr;align-items:center;">
+                  <div style="font-weight:600;color:#6b7280;">📧 E-posta</div><div>${email}</div>
+                </div>
+                <div style="display:grid;grid-template-columns:130px 1fr;align-items:center;">
+                  <div style="font-weight:600;color:#6b7280;">📞 Telefon</div><div>${phone}</div>
+                </div>
+                <div style="display:grid;grid-template-columns:130px 1fr;align-items:center;">
+                  <div style="font-weight:600;color:#6b7280;">📦 Plan</div><div>${plan}</div>
+                </div>
+                <div style="display:grid;grid-template-columns:130px 1fr;align-items:flex-start;">
+                  <div style="font-weight:600;color:#6b7280;">📝 Mesaj</div><div>${message?.trim() || 'Belirtilmedi'}</div>
+                </div>
+                <div style="margin-top:6px;padding:14px 16px;border-radius:12px;background:linear-gradient(135deg,#f3e8ff,#eef2ff);border:1px solid #e7ddff;">
+                  <div style="font-weight:700;color:#4c1d95;margin-bottom:6px;">📌 Otomatik Demo Bilgisi</div>
+                  <div style="color:#4b5563;font-size:14px;">Kullanıcı adı: <strong>test</strong> — Şifre: <strong>123</strong></div>
+                </div>
+              </div>
+              <div style="padding:14px 22px;border-top:1px solid #eef0f6;font-size:13px;color:#6b7280;">
+                Lütfen en kısa sürede kullanıcıyla iletişime geçiniz.
+              </div>
+            </div>
+          </div>
+        `,
                 text: `
-Yeni bir talep alındı:
+VetCare - Yeni demo talebi
 
 Ad Soyad : ${name}
 E-posta  : ${email}
 Telefon  : ${phone}
 Plan     : ${plan}
 Mesaj    : ${message?.trim() || 'Belirtilmedi'}
-      `
+Otomatik demo: kullanıcı adı=test şifre=123
+        `
             });
 
             res.status(200).json({ success: true, message: 'Demo talebi gönderildi' });
