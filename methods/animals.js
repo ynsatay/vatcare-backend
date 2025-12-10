@@ -1,6 +1,7 @@
 
 import connection from "../knex/connection.js";
 import authenticateToken from './Middleware/index.js';
+import blockDemoUser from "./Middleware/blockDemoUser.js";
 
 function methodsanimals(app) {
     //Hayvan apileri
@@ -65,7 +66,7 @@ function methodsanimals(app) {
             });
     });
 
-    app.delete('/api/animalslistDel/:id', authenticateToken, (req, res) => {
+    app.delete('/api/animalslistDel/:id', authenticateToken, blockDemoUser, (req, res) => {
         const { id } = req.params;
 
         connection('users_animals')
@@ -86,7 +87,7 @@ function methodsanimals(app) {
     });
 
 
-    app.put('/api/animalslistUpdate/:id', authenticateToken, async (req, res) => {
+    app.put('/api/animalslistUpdate/:id', authenticateToken, blockDemoUser, async (req, res) => {
         const id = req.params.id;
         const { animal_id, user_id, animal_species_id, birthdate, deathdate, animalidentnumber, picture, isdeath, active, animalname } = req.body;
 
@@ -113,7 +114,7 @@ function methodsanimals(app) {
         }
     });
 
-    app.post('/api/animalpost', authenticateToken, async (req, res) => {
+    app.post('/api/animalpost', authenticateToken, blockDemoUser, async (req, res) => {
         try {
             const offId = req.user.off_id;
 

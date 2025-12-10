@@ -6,6 +6,7 @@ import authenticateToken from "./Middleware/index.js";
 import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
 import { sendMail } from '../methods/utils/mailer.js';
+import blockDemoUser from "./Middleware/blockDemoUser.js";
 dotenv.config();
 
 const storage = multer.memoryStorage();
@@ -118,7 +119,7 @@ function methods(app) {
     });
 
     //TEXT alana Resim kaydetme
-    app.post('/api/upload-profile-picture', authenticateToken, upload.single('picture'), (req, res) => {
+    app.post('/api/upload-profile-picture', authenticateToken, blockDemoUser, upload.single('picture'), (req, res) => {
         try {
             if (!req.file) {
                 return res.status(400).json({ error: 'Lütfen bir resim dosyası seçiniz', status: 'error' });
@@ -177,7 +178,7 @@ function methods(app) {
     });
 
     //Profili günceller
-    app.post('/api/update-profile', authenticateToken, upload.single('picture'), (req, res) => {
+    app.post('/api/update-profile', authenticateToken, blockDemoUser, upload.single('picture'), (req, res) => {
         try {
             const { userId, name, surname, password, phone, email, sex, birthdate, address, nationality } = req.body;
 
@@ -257,7 +258,7 @@ function methods(app) {
         });
     });
 
-    app.post('/api/change-password', authenticateToken, (req, res) => {
+    app.post('/api/change-password', authenticateToken, blockDemoUser, (req, res) => {
         const { userid, oldPassword, password, passwordAgain } = req.body;
 
         connection.select('password').from('users').where('id', userid).then((user) => {
@@ -354,7 +355,7 @@ function methods(app) {
 
 
     //mail apisi
-    app.post('/api/sendDemoRequest', async (req, res) => {
+    app.post('/api/sendDemoRequest', blockDemoUser,async (req, res) => {
         const { name, email, phone, message, plan } = req.body;
 
         try {

@@ -3,6 +3,7 @@ import connection from "../knex/connection.js";
 import authenticateToken from './Middleware/index.js';
 import logFeed from './utils/logFeed.js';
 import { deleteFeedWithReference } from './utils/deleteFeed.js';
+import blockDemoUser from "./Middleware/blockDemoUser.js";
 
 function methodPatProcess(app) {
 
@@ -35,7 +36,7 @@ function methodPatProcess(app) {
 
 
     // 2️⃣ Malzeme veya hizmet ekleme
-    app.post('/api/add-patient-process', authenticateToken, async (req, res) => {
+    app.post('/api/add-patient-process', authenticateToken, blockDemoUser, async (req, res) => {
         const trx = await connection.transaction();
         try {
             const off_id = req.user.off_id;
@@ -140,7 +141,7 @@ function methodPatProcess(app) {
 
 
     // 3️⃣ İşlem silme
-    app.delete('/api/delete-patient-process/:id', authenticateToken, async (req, res) => {
+    app.delete('/api/delete-patient-process/:id', authenticateToken, blockDemoUser, async (req, res) => {
         const off_id = req.user.off_id;
         const { id } = req.params;
 
@@ -203,7 +204,7 @@ function methodPatProcess(app) {
     });
 
     // 4️⃣ İşlem güncelleme
-    app.put('/api/patient-process/:id', authenticateToken, async (req, res) => {
+    app.put('/api/patient-process/:id', authenticateToken, blockDemoUser, async (req, res) => {
         try {
             const off_id = req.user.off_id;
             const { id } = req.params;

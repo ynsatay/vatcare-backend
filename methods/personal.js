@@ -3,13 +3,14 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import multer from 'multer';
 import authenticateToken from "./Middleware/index.js";
+import blockDemoUser from "./Middleware/blockDemoUser.js";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 function methodpersonal(app) {
 
-    app.post('/api/addpersonel', authenticateToken, (req, res) => {
+    app.post('/api/addpersonel', authenticateToken, blockDemoUser,  (req, res) => {
         try {
             const {
                 name, surname, username, password, passwordAgain,
@@ -128,7 +129,7 @@ function methodpersonal(app) {
             });
     });
 
-    app.put('/api/updatepersonel/:id', authenticateToken, (req, res) => {
+    app.put('/api/updatepersonel/:id', authenticateToken, blockDemoUser, (req, res) => {
         const userId = req.params.id;
         const {
             name,
@@ -167,7 +168,7 @@ function methodpersonal(app) {
             });
     });
 
-    app.put('/api/updateusername', authenticateToken, (req, res) => {
+    app.put('/api/updateusername', authenticateToken, blockDemoUser, (req, res) => {
         const { id, username } = req.body;
 
         if (!id || !username) {

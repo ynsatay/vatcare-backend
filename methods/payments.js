@@ -2,6 +2,7 @@ import connection from "../knex/connection.js";
 import authenticateToken from "./Middleware/index.js";
 import logFeed from './utils/logFeed.js';
 import { deleteFeedWithReference } from './utils/deleteFeed.js';
+import blockDemoUser from "./Middleware/blockDemoUser.js";
 
 function methodPayment(app) {
 
@@ -37,7 +38,7 @@ function methodPayment(app) {
     });
 
     // Tahsilat ekleme
-    app.post("/api/add-payment", authenticateToken, async (req, res) => {
+    app.post("/api/add-payment", authenticateToken, blockDemoUser, async (req, res) => {
         try {
             const off_id = req.user.off_id;
             const { pa_id, vet_u_id, type, is_refund = false, details } = req.body;
@@ -180,7 +181,7 @@ function methodPayment(app) {
         }
     });
 
-    app.delete("/api/delete-payment/:id", authenticateToken, async (req, res) => {
+    app.delete("/api/delete-payment/:id", authenticateToken, blockDemoUser, async (req, res) => {
         try {
             const off_id = req.user.off_id;
             const { id } = req.params;

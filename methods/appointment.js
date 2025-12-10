@@ -2,9 +2,11 @@ import connection from "../knex/connection.js";
 import authenticateToken from "./Middleware/index.js";
 import logFeed from './utils/logFeed.js';
 import { deleteFeedWithReference } from './utils/deleteFeed.js';
+import blockDemoUser from "./Middleware/blockDemoUser.js";
+
 
 function methodappointment(app) {
-    app.post('/api/addappointment', authenticateToken, async (req, res) => {
+    app.post('/api/addappointment', authenticateToken, blockDemoUser, async (req, res) => {
         try {
             const off_id = req.user.off_id;
 
@@ -102,7 +104,7 @@ function methodappointment(app) {
             });
     });
 
-    app.post('/api/updateappointment', authenticateToken, (req, res) => {
+    app.post('/api/updateappointment', authenticateToken, blockDemoUser, (req, res) => {
         const off_id = req.user.off_id;
         const { id, start_time, end_time, status } = req.body;
 
@@ -126,7 +128,7 @@ function methodappointment(app) {
             });
     });
 
-    app.delete('/api/deleteappointment/:id', authenticateToken, async (req, res) => {
+    app.delete('/api/deleteappointment/:id', authenticateToken, blockDemoUser, async (req, res) => {
         const off_id = req.user.off_id;
         const { id } = req.params;
 

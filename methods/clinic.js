@@ -1,6 +1,7 @@
 
 import connection from "../knex/connection.js";
 import authenticateToken from './Middleware/index.js';
+import blockDemoUser from "./Middleware/blockDemoUser.js";
 
 function methodsclinic(app) {
     //Clinic apileri
@@ -40,7 +41,7 @@ function methodsclinic(app) {
     //         });
     // });
 
-    app.put('/api/cliniclistUpdate/:id', async (req, res) => {
+    app.put('/api/cliniclistUpdate/:id', blockDemoUser, async (req, res) => {
         const id = req.params.id;
         const { name, email, phone } = req.body;
 

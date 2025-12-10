@@ -1,6 +1,7 @@
 import { response } from "express";
 import connection from "../knex/connection.js";
 import authenticateToken from './Middleware/index.js';
+import blockDemoUser from "./Middleware/blockDemoUser.js";
 
 function methodVaccine(app) {
     //1. Planlanan aşıların Ay'a göre listelenmesi
@@ -90,7 +91,7 @@ function methodVaccine(app) {
     });
 
     //4. hayvana aşı planı oluşturma
-    app.post('/api/vaccine/plan-multiple', authenticateToken, async (req, res) => {
+    app.post('/api/vaccine/plan-multiple', authenticateToken, blockDemoUser, async (req, res) => {
         const off_id = req.user.off_id;
         const { animal_id, m_id, planned_date, repeat_interval_months, repeat_count, notes, created_by } = req.body;
 
@@ -135,7 +136,7 @@ function methodVaccine(app) {
     });
 
     //5. aşı planı güncelleme
-    app.put('/api/vaccine/plan/:id', authenticateToken, async (req, res) => {
+    app.put('/api/vaccine/plan/:id', authenticateToken, blockDemoUser, async (req, res) => {
         const off_id = req.user.off_id;
         const { id } = req.params;
         const { planned_date, notes } = req.body;
@@ -166,7 +167,7 @@ function methodVaccine(app) {
     });
 
     //6. Aşı planını silme
-    app.delete('/api/vaccine/plan/:id', authenticateToken, async (req, res) => {
+    app.delete('/api/vaccine/plan/:id', authenticateToken, blockDemoUser, async (req, res) => {
         const off_id = req.user.off_id;
         const { id } = req.params;
 
@@ -226,7 +227,7 @@ function methodVaccine(app) {
     });
 
     //7. Aşı planının uygulanması
-    app.put('/api/vaccine/plan/:id/apply', authenticateToken, async (req, res) => {
+    app.put('/api/vaccine/plan/:id/apply', authenticateToken, blockDemoUser, async (req, res) => {
         const off_id = req.user.off_id;
         const { id } = req.params;
         const { pp_id } = req.body;

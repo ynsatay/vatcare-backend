@@ -1,5 +1,6 @@
 import connection from "../knex/connection.js";
 import authenticateToken from "./Middleware/index.js";
+import blockDemoUser from "./Middleware/blockDemoUser.js";
 
 function methodsprovider(app) {
     app.get('/api/provider-firms', authenticateToken, async (req, res) => {
@@ -23,7 +24,7 @@ function methodsprovider(app) {
         }
     });
 
-    app.post('/api/add-provider-firms', authenticateToken, async (req, res) => {
+    app.post('/api/add-provider-firms', authenticateToken, blockDemoUser, async (req, res) => {
         const { name, contact_person, phone, email, address, active } = req.body;
 
         if (!name) {
@@ -47,7 +48,7 @@ function methodsprovider(app) {
         }
     });
 
-    app.put('/api/upd-provider-firms/:id', authenticateToken, async (req, res) => {
+    app.put('/api/upd-provider-firms/:id', authenticateToken, blockDemoUser, async (req, res) => {
         const { id } = req.params;
         const { name, contact_person, phone, email, address, active } = req.body;
 
@@ -74,7 +75,7 @@ function methodsprovider(app) {
         }
     });
 
-    app.delete('/api/del-provider-firms/:id', authenticateToken, async (req, res) => {
+    app.delete('/api/del-provider-firms/:id', authenticateToken, blockDemoUser, async (req, res) => {
         const { id } = req.params;
 
         try {
@@ -120,7 +121,7 @@ function methodsprovider(app) {
     });
 
 
-    app.post('/api/add-provider-price', authenticateToken, async (req, res) => {
+    app.post('/api/add-provider-price', authenticateToken, blockDemoUser, async (req, res) => {
         const { pf_id, material_id, purchase_price, vat_rate, is_default, active } = req.body;
 
         try {
@@ -141,7 +142,7 @@ function methodsprovider(app) {
         }
     });
 
-    app.put('/api/provider-price-update/:id', authenticateToken, async (req, res) => {
+    app.put('/api/provider-price-update/:id', authenticateToken, blockDemoUser, async (req, res) => {
         const { id } = req.params;
         const { pf_id, material_id, purchase_price, vat_rate, is_default, active } = req.body;
 
@@ -166,7 +167,7 @@ function methodsprovider(app) {
         }
     });
 
-    app.delete('/api/provider-price-delete/:id', authenticateToken, async (req, res) => {
+    app.delete('/api/provider-price-delete/:id', authenticateToken, blockDemoUser, async (req, res) => {
         const { id } = req.params;
 
         try {

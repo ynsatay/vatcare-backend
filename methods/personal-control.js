@@ -1,6 +1,7 @@
 import { response } from "express";
 import connection from "../knex/connection.js";
 import authenticateToken from './Middleware/index.js';
+import blockDemoUser from "./Middleware/blockDemoUser.js";
 
 function MethodPersoneSearch(app) {
     // TC YE GORE KULLANICI SORGULAMA
@@ -131,7 +132,7 @@ function MethodPersoneSearch(app) {
     });
 
 
-    app.post('/api/AddPatientfile', authenticateToken, (req, res) => {
+    app.post('/api/AddPatientfile', authenticateToken, blockDemoUser,  (req, res) => {
         try {
             const off_id = req.user.off_id;
 
@@ -227,7 +228,7 @@ function MethodPersoneSearch(app) {
             });
     });
 
-    app.put('/api/patient-arrival/:id/discharge', authenticateToken, async (req, res) => {
+    app.put('/api/patient-arrival/:id/discharge', authenticateToken, blockDemoUser,  async (req, res) => {
         const arrivalId = req.params.id;
 
         try {
@@ -278,7 +279,7 @@ function MethodPersoneSearch(app) {
         }
     });
 
-    app.put('/api/patient-arrival/:id/undo-discharge', authenticateToken, async (req, res) => {
+    app.put('/api/patient-arrival/:id/undo-discharge', authenticateToken, blockDemoUser,  async (req, res) => {
         try {
             await connection("patient_arrivals")
                 .where("id", req.params.id)

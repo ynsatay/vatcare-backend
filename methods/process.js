@@ -1,9 +1,10 @@
 import { response } from "express";
 import connection from "../knex/connection.js";
 import authenticateToken from './Middleware/index.js';
+import blockDemoUser from "./Middleware/blockDemoUser.js";
 
 function methodProcess(app) {
-    app.post('/api/addMaterial', authenticateToken, async (req, res) => {
+    app.post('/api/addMaterial', authenticateToken, blockDemoUser, async (req, res) => {
         try {
             const { name, price, unit, category, min_stock_level, barcode, description } = req.body;
             // if (!name || !quantity || !unit) { //Stok Alım Ekanı için kaldırıldı.
@@ -38,7 +39,7 @@ function methodProcess(app) {
         }
     });
 
-    app.get('/api/getMaterials', authenticateToken, async (req, res) => {
+    app.get('/api/getMaterials', authenticateToken, blockDemoUser, async (req, res) => {
         try {
             const materials = await connection('materials').select('*');
             return res.status(200).json({
@@ -127,7 +128,7 @@ function methodProcess(app) {
             return res.status(500).json({ error: 'Database error', status: 'error' });
         }
     });
-    app.delete('/api/deleteMaterial/:id', authenticateToken, async (req, res) => {
+    app.delete('/api/deleteMaterial/:id', authenticateToken, blockDemoUser, async (req, res) => {
         const id = req.params.id;
         try {
             const relatedProcesses = await connection('patient_process')
@@ -155,7 +156,7 @@ function methodProcess(app) {
         }
     });
 
-    app.put('/api/updateMaterial/:id', authenticateToken, async (req, res) => {
+    app.put('/api/updateMaterial/:id', authenticateToken, blockDemoUser, async (req, res) => {
         const id = req.params.id;
         const {
             name,
@@ -228,7 +229,7 @@ function methodProcess(app) {
 
     //HIZMET APILERI
 
-    app.post('/api/addService', authenticateToken, async (req, res) => {
+    app.post('/api/addService', authenticateToken, blockDemoUser, async (req, res) => {
         const { name, price, category, description } = req.body;
 
         if (!name) {
@@ -262,7 +263,7 @@ function methodProcess(app) {
     });
 
 
-    app.delete('/api/deleteService/:id', authenticateToken, async (req, res) => {
+    app.delete('/api/deleteService/:id', authenticateToken, blockDemoUser, async (req, res) => {
         const { id } = req.params;
 
         try {
@@ -294,7 +295,7 @@ function methodProcess(app) {
 
 
 
-    app.put('/api/updateService/:id', authenticateToken, async (req, res) => {
+    app.put('/api/updateService/:id', authenticateToken, blockDemoUser, async (req, res) => {
         const { id } = req.params;
         const { name, price, category, description } = req.body;
 

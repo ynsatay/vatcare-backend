@@ -1,9 +1,10 @@
 import connection from "../knex/connection.js";
 import authenticateToken from './Middleware/index.js';
+import blockDemoUser from "./Middleware/blockDemoUser.js";
 
 function methodStockMovements(app) {
     // 1. Fatura oluştur
-    app.post("/api/material-invoice/create", authenticateToken, async (req, res) => {
+    app.post("/api/material-invoice/create", authenticateToken, blockDemoUser, async (req, res) => {
         try {
             const off_id = req.user.off_id;
             const { inv_no, inv_date, inv_type, total_amount } = req.body;
@@ -40,7 +41,7 @@ function methodStockMovements(app) {
     });
 
     // 2. Fatura hareketi ekle + stok güncelle
-    app.post("/api/material-movement/add", authenticateToken, async (req, res) => {
+    app.post("/api/material-movement/add", authenticateToken, blockDemoUser, async (req, res) => {
         const trx = await connection.transaction();
         try {
             const off_id = req.user.off_id;
@@ -174,7 +175,7 @@ function methodStockMovements(app) {
     });
 
     // 5. Belirli faturanın tüm hareketlerini sil
-    app.delete("/api/material-invoice/:id/movement-delete", authenticateToken, async (req, res) => {
+    app.delete("/api/material-invoice/:id/movement-delete", authenticateToken, blockDemoUser, async (req, res) => {
         const trx = await connection.transaction();
         try {
             const off_id = req.user.off_id;
@@ -221,7 +222,7 @@ function methodStockMovements(app) {
     });
 
     // 6. Fatura ve hareketleri topluca oluştur
-    app.post("/api/material-invoice/full-create", authenticateToken, async (req, res) => {
+    app.post("/api/material-invoice/full-create", authenticateToken, blockDemoUser, async (req, res) => {
         const trx = await connection.transaction();
 
         try {
