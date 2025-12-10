@@ -1,395 +1,239 @@
-import connection from "../knex/connection.js";
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
-import multer from 'multer';
-import authenticateToken from "./Middleware/index.js";
-import dotenv from 'dotenv';
-import nodemailer from 'nodemailer';
-import { sendMail } from '../methods/utils/mailer.js';
-dotenv.config();
+import React, { useState, useContext, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Button, TextField, Typography, MenuItem, Select, InputLabel, FormControl, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import MenuLogo2 from '../../assets/images/logos/vc2.png';
+import LoginBack from '../../assets/images/bg/login-bg2.png';
+import "../scss/_login.scss";
+import axios from 'axios';
+import { AuthContext } from '../../context/usercontext.tsx';
+import { BASE_URL } from "../../config.js";
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
 
-function methods(app) {
-    //Giriş İşlemleri
-    app.post('/api/login', (req, res) => {
-        const { username, password, office_id } = req.body;
+const Login = () => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [offices, setOffices] = useState([]);
+  const [selectedOffice, setSelectedOffice] = useState('');
+  const [message, setMessage] = useState('');
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [fpEmail, setFpEmail] = useState('');
+  const [fpPhone, setFpPhone] = useState('');
+  const [fpNote, setFpNote] = useState('');
+  const [fpStatus, setFpStatus] = useState('');
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-        if (!username || !password) {
-            return res.status(400).json({ error: 'Kullanıcı adı ve şifre gereklidir', status: 'error' });
+  useEffect(() => {
+    // API'den hr_offices listesini çek
+    const fetchOffices = async () => {
+      try {
+        const res = await axios.get(`${BASE_URL}/hr_offices`);
+        setOffices(res.data);
+
+        // Eğer liste doluysa ilkini seçili yap
+        if (res.data.length > 0) {
+          setSelectedOffice(res.data[0].id);
         }
+      } catch (error) {
+        console.error('Ofisler çekilirken hata:', error);
+      }
+    };
 
-        connection('users')
-            .where(function () {
-                this.where('uname', username).orWhere('email', username);
-            })
-            .andWhere('off_id', office_id)
-            .first()
-            .then((user) => {
-                if (!user) {
-                    return res.status(400).json({ error: 'Kullanıcı adı veya şifre hatalı', status: 'error' });
-                }
+    fetchOffices();
+  }, []);
 
-                bcrypt.compare(password, user.password, (err, result) => {
-                    if (err || !result) {
-                        return res.status(400).json({ error: 'Kullanıcı adı veya şifre hatalı', status: 'error' });
-                    }
+  const handleLogin = async (e) => {
+    e.preventDefault();
 
-                    // JWT payload içine off_id dahil edildi
-                    const token = jwt.sign(
-                        {
-                            username: user.uname,
-                            off_id: user.off_id,
-                            role: user.role
-                        },
-                        process.env.JWT_SECRET || 'secret', // secret key env değişkeninden alınmalı
-                        { expiresIn: '24h' }
-                    );
+    if (username === '' || password === '') {
+      setMessage('Kullanıcı adı ve şifre gereklidir');
+      return;
+    }
 
-                    const response = {
-                        status: 'success',
-                        message: 'Giriş başarılı',
-                        token: token,
-                        userid: user.id,
-                        username: user.uname,
-                        userRole: user.role,
-                        off_id: user.off_id
-                    };
+    try {
+      const response = await axios.post(`${BASE_URL}/login`, {
+        username,
+        password,
+        office_id: selectedOffice,
+      });
 
-                    return res.status(200).json(response);
-                });
-            })
-            .catch((error) => {
-                console.error('Login error:', error);
-                return res.status(500).json({ error: 'Sunucu hatası', status: 'error' });
-            });
-    });
+      setMessage(`Giriş başarılı: ${response.data.message}`);
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('userid', response.data.userid);
+      localStorage.setItem('off_id', response.data.off_id);
 
-    // HR Offices listesini çekme endpointi
-    app.get('/api/hr_offices', async (req, res) => {
-        try {
-            const offices = await connection('hr_offices').select('*');
-            return res.status(200).json(offices);
-        } catch (error) {
-            console.error('HR Offices API error:', error);
-            return res.status(500).json({ error: 'Sunucu hatası oluştu' });
-        }
-    });
+      axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
 
-    //Kayıt İşlemleri--şimdilik kullanılmıyor.
-    app.post('/api/register', (req, res) => {
-        try {
-            const { name, surname, username, password, passwordAgain, email } = req.body;
-            if (name === '' || surname === '' || username === '' || password === '' || email === '') {
-                return res.status(400).json({ error: 'Kullanıcı adı, sifre ve email gereklidir', status: 'error' });
-            }
+      login({
+        token: response.data.token,
+        username: response.data.username,
+        userid: response.data.userid,
+        userRole: response.data.userRole,
+        offId: response.data.off_id
+      });
 
-            if (password !== passwordAgain) {
-                return res.status(400).json({ error: 'Sifreler uyusmuyor', status: 'error' });
-            }
+      navigate('/');
 
-            connection.select().from('users').where('uname', username).orWhere('email', email).then((user) => {
-                if (user.length > 0) {
-                    return res.status(400).json({ error: 'Kullanıcı adı ya da email zaten kayıtlı', status: 'error' });
-                }
+    } catch (error) {
+      localStorage.setItem('token', '');
+      if (error.response) {
+        setMessage(`Hata: ${error.response.data.error}`);
+      } else {
+        setMessage('Bir hata oluştu');
+      }
+      console.error('Error:', error);
+    }
+  };
 
-                bcrypt.hash(password, 10, (err, hash) => {
-                    if (err) {
-                        return res.status(400).json({ error: 'Kullanıcı adı ya da email zaten kayıtlı', status: 'error' });
-                    }
+  const handleForgotSubmit = async (e) => {
+    e.preventDefault();
+    setFpStatus('');
+    try {
+      await axios.post(`${BASE_URL}/forgot-password-request`, {
+        email: fpEmail,
+        phone: fpPhone,
+        note: fpNote,
+      });
+      setFpStatus('Talebiniz alındı. Kısa sürede dönüş yapılacaktır.');
+      setFpEmail('');
+      setFpPhone('');
+      setFpNote('');
+      setTimeout(() => setForgotOpen(false), 1200);
+    } catch (error) {
+      console.error('Forgot password request error:', error);
+      setFpStatus('Gönderilemedi, lütfen daha sonra tekrar deneyin.');
+    }
+  };
 
-                    const token = jwt.sign({ username: username }, 'secret', { expiresIn: '24h' });
-                    connection('users').insert({ name: name, surname: surname, uname: username, password: hash, email: email, role: '1', active: '1' }).then(() => {
-                        var response = {
-                            status: 'success',
-                            // message: 'Kayıt islemi tamamlandı. Lütfen e-mail adresinize gelen link ile hesabınızı aktif ediniz.',
-                            message: 'Kayıt islemi tamamlandı.',
-                            token: token
-                        }
-                        return res.status(200).json(response);
-                    });
-                });
-            });
-        } catch (error) {
-            console.error(error);
-            return res.status(500).json({ error: 'Sunucu hatası', status: 'error' });
-        }
-    });
+  return (
+    <div className='maindiv'>
+      <div className='altdiv'>
+        <div className='altdiv2'>
+          <div className='imagediv'>
+            <div className='alt-image-div'>
+              <img src={LoginBack} alt="Background" className='alt-image' />
+            </div>
+          </div>
+          <div className='form-div'>
+            <div className='form-image-div'>
+              <div className='alt-form-image.div'>
+                <img src={MenuLogo2} alt="Logo" className='form-image' />
+              </div>
+              <Typography variant="h4" component="h1" gutterBottom>
+                Hoşgeldiniz!
+              </Typography>
+              <form className='form' onSubmit={handleLogin}>
 
-    //TEXT alana Resim kaydetme
-    app.post('/api/upload-profile-picture', authenticateToken, upload.single('picture'), (req, res) => {
-        try {
-            if (!req.file) {
-                return res.status(400).json({ error: 'Lütfen bir resim dosyası seçiniz', status: 'error' });
-            }
+                {/* Office select box */}
+                <FormControl fullWidth margin="normal" required sx={{ minWidth: 240 }}>
+                  <InputLabel id="office-select-label">Ofis Seçin</InputLabel>
+                  <Select
+                    labelId="office-select-label"
+                    value={selectedOffice}
+                    label="Ofis Seçin"
+                    onChange={e => setSelectedOffice(e.target.value)}
+                  >
+                    {offices.map(office => (
+                      <MenuItem key={office.id} value={office.id}>
+                        {office.name || `Ofis #${office.id}`}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
-            const { userId } = req.body;
-            const allowedTypes = ['image/jpeg', 'image/png']; // İzin verilen dosya türleri
+                <TextField
+                  label="Kullanıcı Adı"
+                  variant="outlined"
+                  margin="normal"
+                  fullWidth
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+                <TextField
+                  label="Şifre"
+                  type="password"
+                  variant="outlined"
+                  margin="normal"
+                  fullWidth
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <Button
+                  fullWidth
+                  size="large"
+                  variant="contained"
+                  style={{ marginTop: '16px' }}
+                  className='login'
+                  type="submit"
+                >
+                  GİRİŞ
+                </Button>
+              </form>
+              {message && <Typography color="error" style={{ marginTop: '16px' }}>{message}</Typography>}
 
-            if (!allowedTypes.includes(req.file.mimetype)) {
-                return res.status(400).json({ error: 'Sadece JPG veya PNG formatında resim dosyaları yüklenebilir', status: 'error' });
-            }
+              <div className='forgot-password-div'>
+                 <Button variant="text" size="small" onClick={() => setForgotOpen(true)} style={{ color: '#59018b', textTransform: 'none', fontWeight: 600 }}>
+                  Şifremi Unuttum
+                 </Button>
+              </div>
 
-            // Base64 formatına dönüştürmek için
-            const base64Image = req.file.buffer.toString('base64');
+            </div>
+          </div>
+        </div>
+      </div>
 
-            // Veritabanına kaydetme işlemi
-            connection('users')
-                .where('id', userId)
-                .update({ picture: base64Image }) // Yeni blob türündeki alana base64 formatında resmi kaydet
-                .then(() => {
-                    return res.status(200).json({ status: 'success', message: 'Profil resmi başarıyla güncellendi' });
-                })
-                .catch((error) => {
-                    console.error('Profil resmi güncellenirken bir hata oluştu:', error);
-                    return res.status(500).json({ error: 'Sunucu hatası', status: 'error' });
-                });
+      {/* Forgot Password Dialog */}
+      <Dialog open={forgotOpen} onClose={() => setForgotOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{
+          background: 'linear-gradient(135deg, #59018b 0%, #7a1fa8 100%)',
+          color: '#fff',
+          fontWeight: 700
+        }}>
+          Şifre Sıfırlama Talebi
+        </DialogTitle>
+        <DialogContent dividers sx={{ padding: '20px 24px', background: 'linear-gradient(180deg, #f8f9ff 0%, #ffffff 100%)' }}>
+          <Typography sx={{ color: '#4b5563', mb: 2 }}>
+            Lütfen kayıtlı e-posta adresinizi ve iletişim numaranızı girin. Talebiniz ekibimize iletilecek.
+          </Typography>
+          <form id="forgot-form" onSubmit={handleForgotSubmit} style={{ display: 'grid', gap: '14px' }}>
+            <TextField
+              label="E-Posta"
+              type="email"
+              fullWidth
+              required
+              value={fpEmail}
+              onChange={(e) => setFpEmail(e.target.value)}
+            />
+            <TextField
+              label="Telefon (opsiyonel)"
+              fullWidth
+              value={fpPhone}
+              onChange={(e) => setFpPhone(e.target.value)}
+            />
+            <TextField
+              label="Not (opsiyonel)"
+              multiline
+              minRows={3}
+              fullWidth
+              value={fpNote}
+              onChange={(e) => setFpNote(e.target.value)}
+            />
+            {fpStatus && (
+              <Typography sx={{ color: '#2563eb', fontWeight: 600 }}>
+                {fpStatus}
+              </Typography>
+            )}
+          </form>
+        </DialogContent>
+        <DialogActions sx={{ padding: '12px 16px' }}>
+          <Button onClick={() => setForgotOpen(false)} color="inherit">İptal</Button>
+          <Button type="submit" form="forgot-form" variant="contained" sx={{ background: '#59018b' }}>
+            Talep Gönder
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
+  );
+};
 
-        } catch (error) {
-            console.error('Profil resmi yüklenirken bir hata oluştu:', error);
-            return res.status(500).json({ error: 'Sunucu hatası', status: 'error' });
-        }
-    });
-
-    //Porifl resmini veri tabanından çekme islemi
-    app.get('/api/get-profile-picture/:userid', authenticateToken, (req, res) => {
-        const { userid } = req.params; // Parametre adını userid olarak değiştirin
-
-        // Veritabanından kullanıcıyı id'ye göre sorgula
-        connection.select('picture').from('users').where('id', userid).then((user) => {
-            if (user.length === 0) {
-                return res.status(404).json({ error: 'Kullanıcı bulunamadı', status: 'error' });
-            }
-
-            // Kullanıcının profil resmini base64 formatında frontend'e gönder
-            if (!user[0].picture) {
-                return res.status(404).json({ error: 'Profil resmi bulunamadı', status: 'error' });
-            }
-
-            const profileImage = user[0].picture.toString('base64');
-
-            return res.status(200).json({ status: 'success', profileImage });
-        }).catch((error) => {
-            console.error('Profil resmi getirilirken bir hata oluştu:', error);
-            return res.status(500).json({ error: 'Sunucu hatası', status: 'error' });
-        });
-    });
-
-    //Profili günceller
-    app.post('/api/update-profile', authenticateToken, upload.single('picture'), (req, res) => {
-        try {
-            const { userId, name, surname, password, phone, email, sex, birthdate, address, nationality } = req.body;
-
-            if (req.file) {
-                const allowedTypes = ['image/jpeg', 'image/png'];
-                if (!allowedTypes.includes(req.file.mimetype)) {
-                    return res.status(400).json({ error: 'Sadece JPG veya PNG formatında resim dosyaları yüklenebilir', status: 'error' });
-                }
-            }
-
-            const updateData = {
-                name,
-                surname,
-                password,
-                phone,
-                email,
-                sex,
-                birthdate,
-                address,
-                nationality
-            };
-
-            if (req.file) {
-                const base64Image = req.file.buffer.toString('base64');
-                updateData.picture = base64Image;
-            }
-
-            connection('users')
-                .where('id', userId)
-                .update(updateData)
-                .then(() => {
-                    return res.status(200).json({ status: 'success', message: 'Profil başarıyla güncellendi' });
-                })
-                .catch((error) => {
-                    console.error('Profil güncellenirken bir hata oluştu:', error);
-                    return res.status(500).json({ error: 'Sunucu hatası', status: 'error' });
-                });
-
-        } catch (error) {
-            console.error('Profil güncellenirken bir hata oluştu:', error);
-            return res.status(500).json({ error: 'Sunucu hatası', status: 'error' });
-        }
-    });
-
-    //Kullanıcı bilgilerini veri tabanından çekme islemi
-    app.get('/api/getUser', authenticateToken, (req, res) => {
-        const userid = req.query.id;
-        let profileImage = null; // profileImage'i let ile tanımladık
-
-        connection.select('*').from('users').where('id', userid).then((user) => {
-            if (user.length === 0) {
-                return res.status(404).json({ error: 'Kullanıcı bulunamadı', status: 'error' });
-            }
-            if (user[0].picture) {
-                profileImage = user[0].picture.toString('base64');
-            }
-
-            const response = {
-                id: user[0].id,
-                name: user[0].name,
-                surname: user[0].surname,
-                email: user[0].email,
-                phone: user[0].phone,
-                sex: user[0].sex,
-                birthdate: user[0].birthdate,
-                address: user[0].address,
-                picture: profileImage,
-                username: user[0].uname,
-                identity: user[0].identity,
-                nationality: user[0].nationality,
-                pass_number: user[0].pass_number
-            }
-            return res.status(200).json({ status: 'success', user: response });
-        }).catch((error) => {
-            console.error('Kullanıcı bilgileri getirilirken bir hata oluştu:', error);
-            return res.status(500).json({ error: 'Sunucu hatası', status: 'error' });
-        });
-    });
-
-    app.post('/api/change-password', authenticateToken, (req, res) => {
-        const { userid, oldPassword, password, passwordAgain } = req.body;
-
-        connection.select('password').from('users').where('id', userid).then((user) => {
-
-            if (password !== passwordAgain) {
-                return res.status(400).json({ error: 'Yeni sifreler uyusmuyor', status: 'error', message: 'Yeni sifreler uyusmuyor!' });
-            }
-
-            const hashedOldPassword = user[0].password;
-            bcrypt.compare(oldPassword, hashedOldPassword, (err, result) => {
-                if (err || !result) {
-                    return res.status(400).json({ error: 'Gecersiz eski sifre', status: 'error', message: 'Gecersiz eski sifre!' });
-                }
-
-                const hashedNewPassword = bcrypt.hashSync(password, 10);
-                connection('users').where('id', userid).update({ password: hashedNewPassword }).then(() => {
-                    return res.status(200).json({ status: 'success', message: 'Sifre başarıyla değiştirildi!' });
-                }).catch((error) => {
-                    console.error('Sifre değiştirilirken bir hata oluştu:', error);
-                    return res.status(500).json({ error: 'Sunucu hatası', status: 'error', message: 'Sifre değiştirilirken bir hata oluştu!' });
-                });
-            });
-        }).catch((error) => {
-            console.error('Sifre değiştirilirken bir hata oluştu:', error);
-            return res.status(500).json({ error: 'Sunucu hatası', status: 'error', message: 'Sifre değiştirilirken bir hata oluştu!' });
-        });
-    });
-
-    //Akışları getirir.
-    app.get('/api/feeds', authenticateToken, async (req, res) => {
-        try {
-            const userOffId = req.user.off_id;
-            const feeds = await connection('feeds as f')
-                .leftJoin('users as u', 'f.user_id', 'u.id')
-                .select(
-                    connection.raw("CONCAT(u.name, ' ', u.surname) as user_name"),
-                    'f.title',
-                    'f.icon',
-                    'f.color',
-                    'f.created_at'
-                )
-                .where('f.off_id', userOffId)
-                .whereRaw('DATE(f.created_at) = CURDATE()')
-                .orderBy('f.created_at', 'desc')
-                .limit(50);
-
-            res.json(feeds);
-        } catch (error) {
-            console.error('Feeds çekilirken hata:', error);
-            res.status(500).json({ error: 'Akış verileri çekilirken hata oluştu' });
-        }
-    });
-
-    app.get("/api/dashboardStats", authenticateToken, async (req, res) => {
-        try {
-            const userOffId = req.user.off_id;
-            const [appCompleted] = await connection("appointment_process")
-                .where("status", "2")
-                .where('off_id', userOffId)
-                .andWhereRaw("MONTH(start_time) = MONTH(CURRENT_DATE())")
-                .andWhereRaw("YEAR(start_time) = YEAR(CURRENT_DATE())")
-                .count("* as total");
-
-            const [totalVaccines] = await connection('patient_process as pp')
-                .join('materials as m', 'pp.process_id', 'm.id')
-                .where('pp.row_type', 'M')
-                .where('off_id', userOffId)
-                .andWhere('m.category', 5)
-                .andWhere('pp.ctime', '>=', connection.raw("DATE_FORMAT(NOW(), '%Y-%m-01')"))
-                .sum('pp.count as total');
-
-            const [appointments] = await connection("appointment_process")
-                .where('off_id', userOffId)
-                .whereRaw("DATE(start_time) = CURRENT_DATE()")
-                .count("* as total");
-
-            const [totalPayments] = await connection('patient_revenues')
-                .where('off_id', userOffId)
-                .where('is_refund', 0)
-                .andWhere('ctime', '>=', connection.raw("DATE_FORMAT(NOW(), '%Y-%m-01')"))
-                .sum('amount as total');
-
-            res.json({
-                appCompleted: appCompleted?.total || 0,
-                vaccines: totalVaccines?.total || 0,
-                appointments: appointments?.total || 0,
-                payments: totalPayments?.total || 0,
-            });
-        } catch (error) {
-            console.error("Dashboard stats error:", error);
-            res.status(500).json({ message: "Sunucu hatası" });
-        }
-    });
-
-
-    //mail apisi
-    app.post('/api/sendDemoRequest', async (req, res) => {
-        const { name, email, phone, message, plan } = req.body;
-
-        try {
-            await sendMail({
-                to: "ynsmratay@gmail.com",
-                subject: 'Yeni Talep',
-                html: `
-        <h2>📩 Yeni Talep</h2>
-        <p><strong>👤 Ad Soyad:</strong> ${name}</p>
-        <p><strong>📧 E-posta:</strong> ${email}</p>
-        <p><strong>📞 Telefon:</strong> ${phone}</p>
-        <p><strong>📦 Plan:</strong> ${plan}</p>
-        <p><strong>📝 Mesaj:</strong> ${message?.trim() || 'Belirtilmedi'}</p>
-        <br/>
-        <p style="color: #555;">Lütfen en kısa sürede kullanıcıyla iletişime geçiniz.</p>
-      `,
-                text: `
-Yeni bir talep alındı:
-
-Ad Soyad : ${name}
-E-posta  : ${email}
-Telefon  : ${phone}
-Plan     : ${plan}
-Mesaj    : ${message?.trim() || 'Belirtilmedi'}
-      `
-            });
-
-            res.status(200).json({ success: true, message: 'Demo talebi gönderildi' });
-        } catch (error) {
-            console.error('Mail gönderme hatası:', error);
-            res.status(500).json({ message: 'Mail gönderme başarısız' });
-        }
-    });
-
-}
-
-
-export default methods;
+export default Login;
