@@ -6,9 +6,9 @@ exports.up = function (knex) {
    return knex.schema.createTable('appointment_process', table => {
       table.increments('id').primary();
       table.integer('user_animal_id').notNullable();
-      table.timestamp('process_date').notNullable(); 
-      table.timestamp('start_time').notNullable();
-      table.timestamp('end_time').notNullable();
+      table.timestamp('process_date').notNullable().defaultTo(knex.fn.now()); 
+      table.timestamp('start_time').notNullable().defaultTo(knex.fn.now());
+      table.timestamp('end_time').notNullable().defaultTo(knex.fn.now());
       table.integer('off_id').notNullable();
       table.text('notes').nullable();
       table.integer('status').defaultTo(0);
