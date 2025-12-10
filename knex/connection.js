@@ -3,10 +3,17 @@ import path from 'path';
 import knex from 'knex';
 import { fileURLToPath } from 'url';
 
+// .env dosyasını otomatik yükle
+dotenv.config();
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+// Debug log
+console.log("MYSQLHOST:", process.env.MYSQLHOST);
+console.log("MYSQLUSER:", process.env.MYSQLUSER);
+console.log("MYSQLDB:", process.env.MYSQLDATABASE);
+console.log("MYSQLPORT:", process.env.MYSQLPORT);
 
 const connection = knex({
   client: 'mysql2',
@@ -16,13 +23,6 @@ const connection = knex({
     password: process.env.MYSQLPASSWORD,
     database: process.env.MYSQLDATABASE,
     port: Number(process.env.MYSQLPORT)
-  },
-  migrations: {
-    tableName: 'migrations',
-    directory: './migrations'
-  },
-  seeds: {
-    directory: './seeds'
   },
   pool: {
     afterCreate: (conn, done) => {
