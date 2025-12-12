@@ -7,6 +7,18 @@ import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
 import { sendMail } from '../methods/utils/mailer.js';
 import blockDemoUser from "./Middleware/blockDemoUser.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const privateKey = fs.readFileSync(
+    path.join(__dirname, "../keys/private.pem"),
+    "utf8"
+);
+
 dotenv.config();
 
 const storage = multer.memoryStorage();
@@ -37,15 +49,18 @@ function methods(app) {
                         return res.status(400).json({ error: 'Kullanıcı adı veya şifre hatalı', status: 'error' });
                     }
 
-                    // JWT payload içine off_id dahil edildi
+                    // 🔐 RS256 ile token oluşturma
                     const token = jwt.sign(
                         {
                             username: user.uname,
                             off_id: user.off_id,
                             role: user.role
                         },
-                        process.env.JWT_SECRET || 'secret', // secret key env değişkeninden alınmalı
-                        { expiresIn: '24h' }
+                        privateKey,
+                        {
+                            algorithm: "RS256",
+                            expiresIn: "24h"
+                        }
                     );
 
                     const response = {
@@ -355,7 +370,7 @@ function methods(app) {
 
 
     //mail apisi
-    app.post('/api/sendDemoRequest', blockDemoUser,async (req, res) => {
+    app.post('/api/sendDemoRequest', blockDemoUser, async (req, res) => {
         const { name, email, phone, message, plan } = req.body;
 
         try {
