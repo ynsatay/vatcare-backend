@@ -14,7 +14,7 @@ const commonConfig = {
   },
   pool: {
     afterCreate: (conn, done) => {
-      conn.query("SET time_zone = '+00:00';", (err) => {
+      conn.query("SET time_zone = '+03:00';", (err) => {
         done(err, conn);
       });
     }
