@@ -322,7 +322,7 @@ function methods(app) {
                         'f.title',
                         'f.icon',
                         'f.color',
-                        'f.created_at'
+                        connection.raw("DATE_FORMAT(f.created_at, '%Y-%m-%d %H:%i:%s') as created_at")
                     )
                     .where('f.off_id', userOffId)
                     .whereRaw('DATE(f.created_at) = CURDATE()')
@@ -339,7 +339,7 @@ function methods(app) {
                         'f.title',
                         'f.icon',
                         'f.color',
-                        'f.created_at'
+                        connection.raw("DATE_FORMAT(f.created_at, '%Y-%m-%d %H:%i:%s') as created_at")
                     )
                     .where('f.off_id', userOffId)
                     .where('f.reference_table', 'patient_revenues')
@@ -360,7 +360,7 @@ function methods(app) {
                         'f.title',
                         'f.icon',
                         'f.color',
-                        'f.created_at'
+                        connection.raw("DATE_FORMAT(f.created_at, '%Y-%m-%d %H:%i:%s') as created_at")
                     )
                     .where('f.off_id', userOffId)
                     .andWhere('f.reference_table', 'patient_process')
@@ -385,7 +385,7 @@ function methods(app) {
                         'f.title',
                         'f.icon',
                         'f.color',
-                        'f.created_at'
+                        connection.raw("DATE_FORMAT(f.created_at, '%Y-%m-%d %H:%i:%s') as created_at")
                     )
                     .where('f.off_id', userOffId)
                     .andWhere('f.reference_table', 'patient_process')
@@ -411,7 +411,7 @@ function methods(app) {
                         'f.title',
                         'f.icon',
                         'f.color',
-                        'f.created_at'
+                        connection.raw("DATE_FORMAT(f.created_at, '%Y-%m-%d %H:%i:%s') as created_at")
                     )
                     .where('f.off_id', userOffId)
                     .andWhere('f.reference_table', 'patient_process')
