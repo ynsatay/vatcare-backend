@@ -39,7 +39,7 @@ function methodProcess(app) {
         }
     });
 
-    app.get('/api/getMaterials', authenticateToken, blockDemoUser, async (req, res) => {
+    app.get('/api/getMaterials', authenticateToken, async (req, res) => {
         try {
             const materials = await connection('materials').select('*');
             return res.status(200).json({

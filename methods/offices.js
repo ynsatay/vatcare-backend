@@ -22,7 +22,7 @@ function methodsoffices(app) {
       });
   });
 
-  app.delete('/api/officelistdel/:id', blockDemoUser, (req, res) => {
+  app.delete('/api/officelistdel/:id', authenticateToken, blockDemoUser, (req, res) => {
     const { id } = req.params;
 
     connection('hr_offices')
@@ -42,7 +42,7 @@ function methodsoffices(app) {
       });
   });
 
-  app.put('/api/officelistUpdate/:id', blockDemoUser, async (req, res) => {
+  app.put('/api/officelistUpdate/:id', authenticateToken, blockDemoUser, async (req, res) => {
     const id = req.params.id;
     const { clinic_id, user_id, package_type, email, phone } = req.body;
     try {
@@ -63,7 +63,7 @@ function methodsoffices(app) {
     }
   });
 
-  app.post('/api/officepost', blockDemoUser, async (req, res) => {
+  app.post('/api/officepost', authenticateToken, blockDemoUser, async (req, res) => {
     try {
       const { clinic_id, user_id, package_type, email, phone } = req.body;
       if (!clinic_id || !user_id || !package_type || !email || !phone) {
