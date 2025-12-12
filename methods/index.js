@@ -306,21 +306,136 @@ function methods(app) {
     app.get('/api/feeds', authenticateToken, async (req, res) => {
         try {
             const userOffId = req.user.off_id;
-            const feeds = await connection('feeds as f')
-                .leftJoin('users as u', 'f.user_id', 'u.id')
-                .select(
-                    connection.raw("CONCAT(u.name, ' ', u.surname) as user_name"),
-                    'f.title',
-                    'f.icon',
-                    'f.color',
-                    'f.created_at'
-                )
-                .where('f.off_id', userOffId)
-                .whereRaw('DATE(f.created_at) = CURDATE()')
-                .orderBy('f.created_at', 'desc')
-                .limit(50);
+            const { category } = req.query;
 
-            res.json(feeds);
+            if (!category) {
+                const feeds = await connection('feeds as f')
+                    .leftJoin('users as u', 'f.user_id', 'u.id')
+                    .select(
+                        connection.raw("CONCAT(u.name, ' ', u.surname) as user_name"),
+                        'f.title',
+                        'f.icon',
+                        'f.color',
+                        'f.created_at'
+                    )
+                    .where('f.off_id', userOffId)
+                    .whereRaw('DATE(f.created_at) = CURDATE()')
+                    .orderBy('f.created_at', 'desc')
+                    .limit(50);
+                return res.json(feeds);
+            }
+
+            if (category === 'payments') {
+                const feeds = await connection('feeds as f')
+                    .leftJoin('users as u', 'f.user_id', 'u.id')
+                    .select(
+                        connection.raw("CONCAT(u.name, ' ', u.surname) as user_name"),
+                        'f.title',
+                        'f.icon',
+                        'f.color',
+                        'f.created_at'
+                    )
+                    .where('f.off_id', userOffId)
+                    .where('f.reference_table', 'patient_revenues')
+                    .whereRaw('DATE(f.created_at) = CURDATE()')
+                    .orderBy('f.created_at', 'desc')
+                    .limit(50);
+                return res.json(feeds);
+            }
+
+            if (category === 'service') {
+                const feeds = await connection('feeds as f')
+                    .join('users as u', 'f.user_id', 'u.id')
+                    .join('patient_process as pp', function () {
+                        this.on('f.reference_id', '=', 'pp.id').andOn('f.reference_table', '=', connection.raw('?', ['patient_process']));
+                    })
+                    .select(
+                        connection.raw("CONCAT(u.name, ' ', u.surname) as user_name"),
+                        'f.title',
+                        'f.icon',
+                        'f.color',
+                        'f.created_at'
+                    )
+                    .where('f.off_id', userOffId)
+                    .andWhere('f.reference_table', 'patient_process')
+                    .andWhere('pp.row_type', 'H')
+                    .whereRaw('DATE(f.created_at) = CURDATE()')
+                    .orderBy('f.created_at', 'desc')
+                    .limit(50);
+                return res.json(feeds);
+            }
+
+            if (category === 'vaccine') {
+                const feeds = await connection('feeds as f')
+                    .join('users as u', 'f.user_id', 'u.id')
+                    .join('patient_process as pp', function () {
+                        this.on('f.reference_id', '=', 'pp.id').andOn('f.reference_table', '=', connection.raw('?', ['patient_process']));
+                    })
+                    .join('materials as m', function () {
+                        this.on('pp.process_id', '=', 'm.id').andOn('pp.row_type', '=', connection.raw('?', ['M']));
+                    })
+                    .select(
+                        connection.raw("CONCAT(u.name, ' ', u.surname) as user_name"),
+                        'f.title',
+                        'f.icon',
+                        'f.color',
+                        'f.created_at'
+                    )
+                    .where('f.off_id', userOffId)
+                    .andWhere('f.reference_table', 'patient_process')
+                    .andWhere('pp.row_type', 'M')
+                    .andWhere('m.category', 5)
+                    .whereRaw('DATE(f.created_at) = CURDATE()')
+                    .orderBy('f.created_at', 'desc')
+                    .limit(50);
+                return res.json(feeds);
+            }
+
+            if (category === 'stock') {
+                const feeds = await connection('feeds as f')
+                    .join('users as u', 'f.user_id', 'u.id')
+                    .join('patient_process as pp', function () {
+                        this.on('f.reference_id', '=', 'pp.id').andOn('f.reference_table', '=', connection.raw('?', ['patient_process']));
+                    })
+                    .join('materials as m', function () {
+                        this.on('pp.process_id', '=', 'm.id').andOn('pp.row_type', '=', connection.raw('?', ['M']));
+                    })
+                    .select(
+                        connection.raw("CONCAT(u.name, ' ', u.surname) as user_name"),
+                        'f.title',
+                        'f.icon',
+                        'f.color',
+                        'f.created_at'
+                    )
+                    .where('f.off_id', userOffId)
+                    .andWhere('f.reference_table', 'patient_process')
+                    .andWhere('pp.row_type', 'M')
+                    .andWhere(function () { this.whereNull('m.category').orWhere('m.category', '!=', 5); })
+                    .whereRaw('DATE(f.created_at) = CURDATE()')
+                    .orderBy('f.created_at', 'desc')
+                    .limit(50);
+                return res.json(feeds);
+            }
+
+            if (category === 'appointment') {
+                const feeds = await connection('feeds as f')
+                    .leftJoin('users as u', 'f.user_id', 'u.id')
+                    .select(
+                        connection.raw("CONCAT(u.name, ' ', u.surname) as user_name"),
+                        'f.title',
+                        'f.icon',
+                        'f.color',
+                        'f.created_at'
+                    )
+                    .where('f.off_id', userOffId)
+                    .where('f.reference_table', 'appointment_process')
+                    .whereRaw('DATE(f.created_at) = CURDATE()')
+                    .orderBy('f.created_at', 'desc')
+                    .limit(50);
+                return res.json(feeds);
+            }
+
+            return res.json([]);
         } catch (error) {
             console.error('Feeds çekilirken hata:', error);
             res.status(500).json({ error: 'Akış verileri çekilirken hata oluştu' });

@@ -345,7 +345,7 @@ function methodProcess(app) {
         }
     });
 
-    app.get('/api/simple-vaccine-usage', authenticateToken, async (req, res) => {
+  app.get('/api/simple-vaccine-usage', authenticateToken, async (req, res) => {
         try {
             const off_id = req.user.off_id;
 
@@ -361,6 +361,50 @@ function methodProcess(app) {
                 ])
                 .sum('pp.count as usage')
                 .groupBy('vaccine_name', 'month');
+
+            res.json(result);
+        } catch (err) {
+            res.status(500).json({ error: "Veri alınamadı", details: err });
+        }
+  });
+
+    // Hizmet kullanımı
+    app.get('/api/service-usage-last-month', authenticateToken, async (req, res) => {
+        try {
+            const off_id = req.user.off_id;
+
+            const result = await connection('patient_process as pp')
+                .join('services as s', 'pp.process_id', 's.id')
+                .where('pp.row_type', 'H')
+                .andWhere('pp.ctime', '>=', connection.raw("DATE_SUB(NOW(), INTERVAL 30 DAY)"))
+                .andWhere('pp.off_id', off_id)
+                .select('s.name')
+                .sum('pp.count as usage_count')
+                .groupBy('s.name')
+                .orderBy('usage_count', 'desc');
+
+            res.json(result);
+        } catch (error) {
+            console.error("Service usage API error:", error);
+            res.status(500).json({ message: 'Veri alınırken hata oluştu.', error });
+        }
+    });
+
+    app.get('/api/simple-service-usage', authenticateToken, async (req, res) => {
+        try {
+            const off_id = req.user.off_id;
+
+            const result = await connection('patient_process as pp')
+                .join('services as s', 'pp.process_id', 's.id')
+                .where('pp.row_type', 'H')
+                .andWhere('pp.ctime', '>=', connection.raw('DATE_SUB(CURDATE(), INTERVAL 12 MONTH)'))
+                .andWhere('pp.off_id', off_id)
+                .select([
+                    connection.raw('MONTH(pp.ctime) as month'),
+                    's.name as service_name'
+                ])
+                .sum('pp.count as usage')
+                .groupBy('service_name', 'month');
 
             res.json(result);
         } catch (err) {

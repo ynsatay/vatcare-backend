@@ -122,7 +122,7 @@ function methodStockMovements(app) {
     });
 
     // 3. Fatura listesini getir
-    app.get("/api/material-invoice/list", authenticateToken, async (req, res) => {
+  app.get("/api/material-invoice/list", authenticateToken, async (req, res) => {
         try {
             const off_id = req.user.off_id;
             const { inv_no, startDate, endDate } = req.query;
@@ -144,7 +144,53 @@ function methodStockMovements(app) {
             console.error("Fatura listesi alınamadı:", err);
             res.status(500).json({ message: "Fatura listesi alınamadı" });
         }
-    });
+  });
+
+  // Basit stok kullanımı (aşı hariç) - son 12 ay
+  app.get("/api/simple-stock-usage", authenticateToken, async (req, res) => {
+    try {
+      const off_id = req.user.off_id;
+      const result = await connection('patient_process as pp')
+        .join('materials as m', 'pp.process_id', 'm.id')
+        .where('pp.row_type', 'M')
+        .andWhere(function() { this.whereNull('m.category').orWhere('m.category', '!=', 5); })
+        .andWhere('pp.ctime', '>=', connection.raw('DATE_SUB(CURDATE(), INTERVAL 12 MONTH)'))
+        .andWhere('pp.off_id', off_id)
+        .select([
+          connection.raw('MONTH(pp.ctime) as month'),
+          'm.name as stock_name'
+        ])
+        .sum('pp.count as usage')
+        .groupBy('stock_name', 'month');
+
+      res.json(result);
+    } catch (err) {
+      console.error('Simple stock usage error:', err);
+      res.status(500).json({ error: 'Veri alınamadı', details: err });
+    }
+  });
+
+  // Stok kullanımı (son 30 gün, aşı hariç)
+  app.get("/api/stock-usage-last-month", authenticateToken, async (req, res) => {
+    try {
+      const off_id = req.user.off_id;
+      const result = await connection('patient_process as pp')
+        .join('materials as m', 'pp.process_id', 'm.id')
+        .where('pp.row_type', 'M')
+        .andWhere(function() { this.whereNull('m.category').orWhere('m.category', '!=', 5); })
+        .andWhere('pp.ctime', '>=', connection.raw("DATE_SUB(NOW(), INTERVAL 30 DAY)"))
+        .andWhere('pp.off_id', off_id)
+        .select('m.name')
+        .sum('pp.count as usage_count')
+        .groupBy('m.name')
+        .orderBy('usage_count', 'desc');
+
+      res.json(result);
+    } catch (error) {
+      console.error('Stock usage last month error:', error);
+      res.status(500).json({ message: 'Veri alınırken hata oluştu.', error });
+    }
+  });
 
     // 4. Belirli faturanın hareketlerini getir
     app.get("/api/material-invoice/:id/movement-list", authenticateToken, async (req, res) => {
