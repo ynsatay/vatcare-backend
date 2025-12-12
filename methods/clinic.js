@@ -41,7 +41,7 @@ function methodsclinic(app) {
     //         });
     // });
 
-    app.put('/api/cliniclistUpdate/:id', blockDemoUser, async (req, res) => {
+    app.put('/api/cliniclistUpdate/:id', authenticateToken, blockDemoUser, async (req, res) => {
         const id = req.params.id;
         const { name, email, phone } = req.body;
 

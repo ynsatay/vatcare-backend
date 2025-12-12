@@ -8,45 +8,51 @@ import nodemailer from 'nodemailer';
 import { sendMail } from '../methods/utils/mailer.js';
 import blockDemoUser from "./Middleware/blockDemoUser.js";
 import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const privateKey = fs.readFileSync(
-    path.join(__dirname, "../keys/private.pem"),
-    "utf8"
-);
 
 dotenv.config();
+
+// 🔐 RSA anahtarlarını ENV üzerinden al
+const privateKeyPath = process.env.JWT_PRIVATE_KEY_PATH;
+const publicKeyPath = process.env.JWT_PUBLIC_KEY_PATH;
+
+const privateKey = fs.readFileSync(privateKeyPath, "utf8");
+const publicKey = fs.readFileSync(publicKeyPath, "utf8");
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+
 function methods(app) {
     //Giriş İşlemleri
-    app.post('/api/login', (req, res) => {
+    app.post("/api/login", (req, res) => {
         const { username, password, office_id } = req.body;
 
         if (!username || !password) {
-            return res.status(400).json({ error: 'Kullanıcı adı ve şifre gereklidir', status: 'error' });
+            return res
+                .status(400)
+                .json({ error: "Kullanıcı adı ve şifre gereklidir", status: "error" });
         }
 
-        connection('users')
+        connection("users")
             .where(function () {
-                this.where('uname', username).orWhere('email', username);
+                this.where("uname", username).orWhere("email", username);
             })
-            .andWhere('off_id', office_id)
+            .andWhere("off_id", office_id)
             .first()
             .then((user) => {
                 if (!user) {
-                    return res.status(400).json({ error: 'Kullanıcı adı veya şifre hatalı', status: 'error' });
+                    return res.status(400).json({
+                        error: "Kullanıcı adı veya şifre hatalı",
+                        status: "error",
+                    });
                 }
 
                 bcrypt.compare(password, user.password, (err, result) => {
                     if (err || !result) {
-                        return res.status(400).json({ error: 'Kullanıcı adı veya şifre hatalı', status: 'error' });
+                        return res.status(400).json({
+                            error: "Kullanıcı adı veya şifre hatalı",
+                            status: "error",
+                        });
                     }
 
                     // 🔐 RS256 ile token oluşturma
@@ -54,31 +60,31 @@ function methods(app) {
                         {
                             username: user.uname,
                             off_id: user.off_id,
-                            role: user.role
+                            role: user.role,
                         },
                         privateKey,
                         {
                             algorithm: "RS256",
-                            expiresIn: "24h"
+                            expiresIn: "24h",
                         }
                     );
 
-                    const response = {
-                        status: 'success',
-                        message: 'Giriş başarılı',
+                    return res.status(200).json({
+                        status: "success",
+                        message: "Giriş başarılı",
                         token: token,
                         userid: user.id,
                         username: user.uname,
                         userRole: user.role,
-                        off_id: user.off_id
-                    };
-
-                    return res.status(200).json(response);
+                        off_id: user.off_id,
+                    });
                 });
             })
             .catch((error) => {
-                console.error('Login error:', error);
-                return res.status(500).json({ error: 'Sunucu hatası', status: 'error' });
+                console.error("Login error:", error);
+                return res
+                    .status(500)
+                    .json({ error: "Sunucu hatası", status: "error" });
             });
     });
 

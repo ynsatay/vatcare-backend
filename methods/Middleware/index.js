@@ -7,26 +7,34 @@ import jwt from "jsonwebtoken";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// ENV'den public key konumunu al
+const publicKeyPath = process.env.JWT_PUBLIC_KEY_PATH;
+
+// Anahtar dosyası kontrolü
+if (!publicKeyPath || !fs.existsSync(publicKeyPath)) {
+  console.error("❌ JWT Public Key bulunamadı! JWT doğrulama yapılamaz.");
+  process.exit(1);
+}
+
 // public key yükle
-const publicKey = fs.readFileSync(
-  path.join(__dirname, "../../keys/public.pem"),
-  "utf8"
-);
+const publicKey = fs.readFileSync(publicKeyPath, "utf8");
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
-    return res.status(401).json({ error: 'Token gerekli', code: 'TOKEN_MISSING' });
+    return res.status(401).json({
+      error: 'Token gerekli',
+      code: 'TOKEN_MISSING'
+    });
   }
 
   jwt.verify(token, publicKey, { algorithms: ["RS256"] }, (err, user) => {
     if (err) {
       return res.status(403).json({
         error: 'Token geçersiz veya süresi dolmuş',
-        code: 'TOKEN_INVALID',
-        detail: err.message
+        code: 'TOKEN_INVALID'
       });
     }
 
