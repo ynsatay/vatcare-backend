@@ -431,12 +431,12 @@ function methods(app) {
                         'f.title',
                         'f.icon',
                         'f.color',
-                        'f.created_at'
+                        connection.raw("DATE_FORMAT(f.feed_date, '%Y-%m-%d %H:%i:%s') as created_at")
                     )
                     .where('f.off_id', userOffId)
                     .where('f.reference_table', 'appointment_process')
-                    .whereRaw('DATE(f.created_at) = CURDATE()')
-                    .orderBy('f.created_at', 'desc')
+                    .whereRaw('DATE(f.feed_date) = CURDATE()')
+                    .orderBy('f.feed_date', 'desc')
                     .limit(50);
                 return res.json(feeds);
             }
