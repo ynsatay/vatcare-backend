@@ -22,7 +22,8 @@ const connection = knex({
     user: process.env.MYSQLUSER,
     password: process.env.MYSQLPASSWORD,
     database: process.env.MYSQLDATABASE,
-    port: Number(process.env.MYSQLPORT)
+    port: Number(process.env.MYSQLPORT),
+    dateStrings: true
   },
   pool: {
     afterCreate: (conn, done) => {
