@@ -16,17 +16,12 @@ const connection = knex({
     password: process.env.MYSQLPASSWORD,
     database: process.env.MYSQLDATABASE,
     port: Number(process.env.MYSQLPORT),
-    timezone: 'Z',     // 🔥 UTC
-    dateStrings: true
-  },
-  pool: {
-    afterCreate: (conn, done) => {
-      // 🔥 MySQL session'ı UTC yap
-      conn.query("SET time_zone = '+00:00';", (err) => {
-        done(err, conn);
-      });
-    }
+
+    // ✅ KRİTİK NOKTA
+    timezone: 'local',   // 🔥 DB’deki saati aynen al
+    dateStrings: true    // 🔥 string olarak dönsün
   }
+  // ❌ pool.afterCreate KALDIRILDI
 });
 
 export default connection;

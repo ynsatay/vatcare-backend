@@ -1,4 +1,5 @@
-process.env.TZ = 'UTC';
+process.env.TZ = 'Europe/Istanbul';
+
 import express from 'express';
 import cors from 'cors';
 import methods from './methods/index.js'; // API metotlarınızı içeren dosya
