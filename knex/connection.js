@@ -16,12 +16,9 @@ const connection = knex({
     password: process.env.MYSQLPASSWORD,
     database: process.env.MYSQLDATABASE,
     port: Number(process.env.MYSQLPORT),
-
-    // ✅ KRİTİK NOKTA
-    timezone: 'local',   // 🔥 DB’deki saati aynen al
-    dateStrings: true    // 🔥 string olarak dönsün
+    timezone: 'Z',        // UTC olarak al
+    dateStrings: ['DATE', 'DATETIME', 'TIMESTAMP']  // Array olarak belirt
   }
-  // ❌ pool.afterCreate KALDIRILDI
 });
 
 export default connection;
