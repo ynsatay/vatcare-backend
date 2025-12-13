@@ -309,144 +309,76 @@ function methods(app) {
     });
 
     //Akışları getirir.
-    app.get('/api/feeds', authenticateToken, async (req, res) => {
-        try {
-            const userOffId = req.user.off_id;
-            const { category } = req.query;
+   app.get('/api/feeds', authenticateToken, async (req, res) => {
+  try {
+    const userOffId = req.user.off_id;
+    const { category } = req.query;
 
-            if (!category) {
-                const feeds = await connection('feeds as f')
-                    .leftJoin('users as u', 'f.user_id', 'u.id')
-                    .select(
-                        connection.raw("CONCAT(u.name, ' ', u.surname) as user_name"),
-                        'f.title',
-                        'f.icon',
-                        'f.color',
-                        connection.raw("CONVERT_TZ(f.feed_date, @@session.time_zone, '+00:00') as created_at")
-                    )
-                    .where('f.off_id', userOffId)
-                    .whereRaw('DATE(f.feed_date) = CURDATE()')
-                    .orderBy('f.feed_date', 'desc')
-                    .limit(50);
-                return res.json(feeds);
-            }
+    const baseSelect = [
+      connection.raw("CONCAT(u.name, ' ', u.surname) as user_name"),
+      'f.title',
+      'f.icon',
+      'f.color',
+      connection.raw("DATE_FORMAT(f.feed_date, '%Y-%m-%d %H:%i:%s') as created_at")
+    ];
 
-            if (category === 'payments') {
-                const feeds = await connection('feeds as f')
-                    .leftJoin('users as u', 'f.user_id', 'u.id')
-                    .select(
-                        connection.raw("CONCAT(u.name, ' ', u.surname) as user_name"),
-                        'f.title',
-                        'f.icon',
-                        'f.color',
-                        connection.raw("f.feed_date as created_at")
-                    )
-                    .where('f.off_id', userOffId)
-                    .where('f.reference_table', 'patient_revenues')
-                    .whereRaw('DATE(f.feed_date) = CURDATE()')
-                    .orderBy('f.feed_date', 'desc')
-                    .limit(50);
-                return res.json(feeds);
-            }
+    let query = connection('feeds as f')
+      .leftJoin('users as u', 'f.user_id', 'u.id')
+      .select(baseSelect)
+      .where('f.off_id', userOffId)
+      .whereRaw('DATE(f.feed_date) = CURDATE()')
+      .orderBy('f.feed_date', 'desc')
+      .limit(50);
 
-            if (category === 'service') {
-                const feeds = await connection('feeds as f')
-                    .join('users as u', 'f.user_id', 'u.id')
-                    .join('patient_process as pp', function () {
-                        this.on('f.reference_id', '=', 'pp.id').andOn('f.reference_table', '=', connection.raw('?', ['patient_process']));
-                    })
-                    .select(
-                        connection.raw("CONCAT(u.name, ' ', u.surname) as user_name"),
-                        'f.title',
-                        'f.icon',
-                        'f.color',
-                        connection.raw("f.feed_date as created_at")
-                    )
-                    .where('f.off_id', userOffId)
-                    .andWhere('f.reference_table', 'patient_process')
-                    .andWhere('pp.row_type', 'H')
-                    .whereRaw('DATE(f.feed_date) = CURDATE()')
-                    .orderBy('f.feed_date', 'desc')
-                    .limit(50);
-                return res.json(feeds);
-            }
+    if (category === 'payments') {
+      query.where('f.reference_table', 'patient_revenues');
+    }
 
-            if (category === 'vaccine') {
-                const feeds = await connection('feeds as f')
-                    .join('users as u', 'f.user_id', 'u.id')
-                    .join('patient_process as pp', function () {
-                        this.on('f.reference_id', '=', 'pp.id').andOn('f.reference_table', '=', connection.raw('?', ['patient_process']));
-                    })
-                    .join('materials as m', function () {
-                        this.on('pp.process_id', '=', 'm.id').andOn('pp.row_type', '=', connection.raw('?', ['M']));
-                    })
-                    .select(
-                        connection.raw("CONCAT(u.name, ' ', u.surname) as user_name"),
-                        'f.title',
-                        'f.icon',
-                        'f.color',
-                        connection.raw("f.feed_date as created_at")
-                    )
-                    .where('f.off_id', userOffId)
-                    .andWhere('f.reference_table', 'patient_process')
-                    .andWhere('pp.row_type', 'M')
-                    .andWhere('m.category', 5)
-                    .whereRaw('DATE(f.feed_date) = CURDATE()')
-                    .orderBy('f.feed_date', 'desc')
-                    .limit(50);
-                return res.json(feeds);
-            }
+    if (category === 'appointment') {
+      query.where('f.reference_table', 'appointment_process');
+    }
 
-            if (category === 'stock') {
-                const feeds = await connection('feeds as f')
-                    .join('users as u', 'f.user_id', 'u.id')
-                    .join('patient_process as pp', function () {
-                        this.on('f.reference_id', '=', 'pp.id').andOn('f.reference_table', '=', connection.raw('?', ['patient_process']));
-                    })
-                    .join('materials as m', function () {
-                        this.on('pp.process_id', '=', 'm.id').andOn('pp.row_type', '=', connection.raw('?', ['M']));
-                    })
-                    .select(
-                        connection.raw("CONCAT(u.name, ' ', u.surname) as user_name"),
-                        'f.title',
-                        'f.icon',
-                        'f.color',
-                        connection.raw("f.feed_date as created_at")
-                    )
-                    .where('f.off_id', userOffId)
-                    .andWhere('f.reference_table', 'patient_process')
-                    .andWhere('pp.row_type', 'M')
-                    .andWhere(function () { this.whereNull('m.category').orWhere('m.category', '!=', 5); })
-                    .whereRaw('DATE(f.feed_date) = CURDATE()')
-                    .orderBy('f.feed_date', 'desc')
-                    .limit(50);
-                return res.json(feeds);
-            }
+    if (category === 'service') {
+      query
+        .join('patient_process as pp', function () {
+          this.on('f.reference_id', '=', 'pp.id')
+              .andOn('f.reference_table', '=', connection.raw('?', ['patient_process']));
+        })
+        .where('pp.row_type', 'H');
+    }
 
-            if (category === 'appointment') {
-                const feeds = await connection('feeds as f')
-                    .leftJoin('users as u', 'f.user_id', 'u.id')
-                    .select(
-                        connection.raw("CONCAT(u.name, ' ', u.surname) as user_name"),
-                        'f.title',
-                        'f.icon',
-                        'f.color',
-                        connection.raw("f.feed_date as created_at")
-                    )
-                    .where('f.off_id', userOffId)
-                    .where('f.reference_table', 'appointment_process')
-                    .whereRaw('DATE(f.feed_date) = CURDATE()')
-                    .orderBy('f.feed_date', 'desc')
-                    .limit(50);
-                return res.json(feeds);
-            }
+    if (category === 'vaccine') {
+      query
+        .join('patient_process as pp', function () {
+          this.on('f.reference_id', '=', 'pp.id')
+              .andOn('f.reference_table', '=', connection.raw('?', ['patient_process']));
+        })
+        .join('materials as m', 'pp.process_id', 'm.id')
+        .where('pp.row_type', 'M')
+        .where('m.category', 5);
+    }
 
-            return res.json([]);
-        } catch (error) {
-            console.error('Feeds çekilirken hata:', error);
-            res.status(500).json({ error: 'Akış verileri çekilirken hata oluştu' });
-        }
-    });
+    if (category === 'stock') {
+      query
+        .join('patient_process as pp', function () {
+          this.on('f.reference_id', '=', 'pp.id')
+              .andOn('f.reference_table', '=', connection.raw('?', ['patient_process']));
+        })
+        .join('materials as m', 'pp.process_id', 'm.id')
+        .where('pp.row_type', 'M')
+        .where(function () {
+          this.whereNull('m.category').orWhere('m.category', '!=', 5);
+        });
+    }
+
+    const feeds = await query;
+    return res.json(feeds);
+
+  } catch (error) {
+    console.error('Feeds çekilirken hata:', error);
+    res.status(500).json({ error: 'Akış verileri çekilirken hata oluştu' });
+  }
+});
 
     app.get("/api/dashboardStats", authenticateToken, async (req, res) => {
         try {
