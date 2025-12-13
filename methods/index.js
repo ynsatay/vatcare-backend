@@ -322,11 +322,11 @@ function methods(app) {
                         'f.title',
                         'f.icon',
                         'f.color',
-                        connection.raw("DATE_FORMAT(f.created_at, '%Y-%m-%d %H:%i:%s') as created_at")
+                        connection.raw("DATE_FORMAT(f.feed_date, '%Y-%m-%d %H:%i:%s') as created_at")
                     )
                     .where('f.off_id', userOffId)
-                    .whereRaw('DATE(f.created_at) = CURDATE()')
-                    .orderBy('f.created_at', 'desc')
+                    .whereRaw('DATE(f.feed_date) = CURDATE()')
+                    .orderBy('f.feed_date', 'desc')
                     .limit(50);
                 return res.json(feeds);
             }
@@ -339,12 +339,12 @@ function methods(app) {
                         'f.title',
                         'f.icon',
                         'f.color',
-                        connection.raw("DATE_FORMAT(f.created_at, '%Y-%m-%d %H:%i:%s') as created_at")
+                        connection.raw("DATE_FORMAT(f.feed_date, '%Y-%m-%d %H:%i:%s') as created_at")
                     )
                     .where('f.off_id', userOffId)
                     .where('f.reference_table', 'patient_revenues')
-                    .whereRaw('DATE(f.created_at) = CURDATE()')
-                    .orderBy('f.created_at', 'desc')
+                    .whereRaw('DATE(f.feed_date) = CURDATE()')
+                    .orderBy('f.feed_date', 'desc')
                     .limit(50);
                 return res.json(feeds);
             }
@@ -360,13 +360,13 @@ function methods(app) {
                         'f.title',
                         'f.icon',
                         'f.color',
-                        connection.raw("DATE_FORMAT(f.created_at, '%Y-%m-%d %H:%i:%s') as created_at")
+                        connection.raw("DATE_FORMAT(f.feed_date, '%Y-%m-%d %H:%i:%s') as created_at")
                     )
                     .where('f.off_id', userOffId)
                     .andWhere('f.reference_table', 'patient_process')
                     .andWhere('pp.row_type', 'H')
-                    .whereRaw('DATE(f.created_at) = CURDATE()')
-                    .orderBy('f.created_at', 'desc')
+                    .whereRaw('DATE(f.feed_date) = CURDATE()')
+                    .orderBy('f.feed_date', 'desc')
                     .limit(50);
                 return res.json(feeds);
             }
@@ -385,14 +385,14 @@ function methods(app) {
                         'f.title',
                         'f.icon',
                         'f.color',
-                        connection.raw("DATE_FORMAT(f.created_at, '%Y-%m-%d %H:%i:%s') as created_at")
+                        connection.raw("DATE_FORMAT(f.feed_date, '%Y-%m-%d %H:%i:%s') as created_at")
                     )
                     .where('f.off_id', userOffId)
                     .andWhere('f.reference_table', 'patient_process')
                     .andWhere('pp.row_type', 'M')
                     .andWhere('m.category', 5)
-                    .whereRaw('DATE(f.created_at) = CURDATE()')
-                    .orderBy('f.created_at', 'desc')
+                    .whereRaw('DATE(f.feed_date) = CURDATE()')
+                    .orderBy('f.feed_date', 'desc')
                     .limit(50);
                 return res.json(feeds);
             }
@@ -411,14 +411,14 @@ function methods(app) {
                         'f.title',
                         'f.icon',
                         'f.color',
-                        connection.raw("DATE_FORMAT(f.created_at, '%Y-%m-%d %H:%i:%s') as created_at")
+                        connection.raw("DATE_FORMAT(f.feed_date, '%Y-%m-%d %H:%i:%s') as created_at")
                     )
                     .where('f.off_id', userOffId)
                     .andWhere('f.reference_table', 'patient_process')
                     .andWhere('pp.row_type', 'M')
                     .andWhere(function () { this.whereNull('m.category').orWhere('m.category', '!=', 5); })
-                    .whereRaw('DATE(f.created_at) = CURDATE()')
-                    .orderBy('f.created_at', 'desc')
+                    .whereRaw('DATE(f.feed_date) = CURDATE()')
+                    .orderBy('f.feed_date', 'desc')
                     .limit(50);
                 return res.json(feeds);
             }
