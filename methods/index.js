@@ -435,6 +435,22 @@ function methods(app) {
         }
     });
 
+    //mail sistemde kayıtlı mı kontorolü
+    app.get('/api/mailControl', (req, res) => {
+        //mail users tablosunda varmı kontrol et
+        const { email } = req.query;
+        connection.select().from('users').where('email', email).then((user) => {
+            if (user.length > 0) {
+                return res.status(200).json({ exists: true });
+            } else {
+                return res.status(200).json({ exists: false });
+            }
+        }).catch((error) => {
+            console.error('Mail kontrol hatası:', error);
+            return res.status(500).json({ error: 'Sunucu hatası', status: 'error' });
+        });
+    });
+
 
     //mail apisi
     app.post('/api/sendDemoRequest', blockDemoUser, async (req, res) => {
