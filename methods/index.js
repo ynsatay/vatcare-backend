@@ -309,7 +309,6 @@ function methods(app) {
     });
 
     //Akışları getirir.
-    //Akışları getirir.
     app.get('/api/feeds', authenticateToken, async (req, res) => {
         try {
             const userOffId = req.user.off_id;
@@ -320,7 +319,7 @@ function methods(app) {
                 'f.title',
                 'f.icon',
                 'f.color',
-                connection.raw("DATE_FORMAT(f.feed_date, '%Y-%m-%d %H:%i:%s') as created_at")
+                connection.raw("DATE_FORMAT(f.feed_date, '%Y-%m-%d %T') as created_at")
             ];
 
             let query = connection('feeds as f')
@@ -373,7 +372,16 @@ function methods(app) {
             }
 
             const feeds = await query;
-            return res.json(feeds);
+
+            // Backend'de formatla
+            const formattedFeeds = feeds.map(feed => ({
+                ...feed,
+                created_at: feed.created_at ?
+                    new Date(feed.created_at).toISOString().slice(0, 19).replace('T', ' ') :
+                    null
+            }));
+
+            return res.json(formattedFeeds);
 
         } catch (error) {
             console.error('Feeds çekilirken hata:', error);
