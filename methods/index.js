@@ -319,7 +319,7 @@ function methods(app) {
                 'f.title',
                 'f.icon',
                 'f.color',
-                connection.raw("CAST(DATE_FORMAT(f.feed_date, '%Y-%m-%d %H:%i:%s') AS CHAR) as created_at")
+                connection.raw("DATE_FORMAT(f.feed_date, '%Y-%m-%d %H:%i:%s') as created_at")
             ];
 
             let query = connection('feeds as f')
@@ -372,6 +372,9 @@ function methods(app) {
             }
 
             const feeds = await query;
+
+            console.log('Raw feeds:', feeds); // Debug için
+
             return res.json(feeds);
 
         } catch (error) {
