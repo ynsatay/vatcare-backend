@@ -148,6 +148,37 @@ function methodStockMovements(app) {
         }
   });
 
+  // 3b. Fatura başlığını güncelle
+  app.put("/api/material-invoice/:id", authenticateToken, blockDemoUser, async (req, res) => {
+    try {
+      const off_id = req.user.off_id;
+      const { id } = req.params;
+      const { inv_no, inv_date, inv_type, total_amount } = req.body;
+
+      if (!id) return res.status(400).json({ message: "Fatura ID gerekli" });
+      if (!inv_no || !inv_date || inv_type == null || total_amount == null) {
+        return res.status(400).json({ message: "Eksik veya geçersiz alanlar var." });
+      }
+
+      const exists = await connection("material_invoice").where({ id, off_id }).first();
+      if (!exists) return res.status(404).json({ message: "Fatura bulunamadı veya yetkiniz yok." });
+
+      await connection("material_invoice")
+        .where({ id, off_id })
+        .update({
+          inv_no,
+          inv_date,
+          inv_type: Number(inv_type),
+          total_amount: Number(total_amount)
+        });
+
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Fatura güncelleme hatası:", err);
+      res.status(500).json({ message: "Fatura güncellenemedi" });
+    }
+  });
+
   // Basit stok kullanımı (aşı hariç) - son 12 ay
   app.get("/api/simple-stock-usage", authenticateToken, async (req, res) => {
     try {
