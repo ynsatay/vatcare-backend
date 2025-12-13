@@ -309,6 +309,7 @@ function methods(app) {
     });
 
     //Akışları getirir.
+    //Akışları getirir.
     app.get('/api/feeds', authenticateToken, async (req, res) => {
         try {
             const userOffId = req.user.off_id;
@@ -319,15 +320,15 @@ function methods(app) {
                 'f.title',
                 'f.icon',
                 'f.color',
-                connection.raw("DATE_FORMAT(f.feed_date, '%Y-%m-%d %H:%i:%s') as created_at")
+                connection.raw("DATE_FORMAT(f.created_at, '%Y-%m-%d %H:%i:%s') as created_at")
             ];
 
             let query = connection('feeds as f')
                 .leftJoin('users as u', 'f.user_id', 'u.id')
                 .select(baseSelect)
                 .where('f.off_id', userOffId)
-                .whereRaw('DATE(f.feed_date) = CURDATE()')
-                .orderBy('f.feed_date', 'desc')
+                .whereRaw('DATE(f.created_at) = CURDATE()')
+                .orderBy('f.created_at', 'desc')
                 .limit(50);
 
             if (category === 'payments') {
