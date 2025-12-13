@@ -125,16 +125,18 @@ function methodStockMovements(app) {
   app.get("/api/material-invoice/list", authenticateToken, async (req, res) => {
         try {
             const off_id = req.user.off_id;
-            const { inv_no, startDate, endDate } = req.query;
+            const { inv_no, startDate, endDate, inv_type } = req.query;
 
             let query = connection("material_invoice").where('off_id', off_id);
 
             if (inv_no) {
-                // Fatura numarasına göre arama (like ile kısmi arama)
                 query = query.where("inv_no", `${inv_no}`);
-            } else if (startDate && endDate) {
-                // Tarih aralığı filtreleme
-                query = query.whereBetween("inv_date", [startDate, endDate]);
+            }
+            if (startDate && endDate) {
+                query = query.whereBetween(connection.raw("DATE(inv_date)"), [startDate, endDate]);
+            }
+            if (inv_type) {
+                query = query.andWhere("inv_type", Number(inv_type));
             }
 
             const invoices = await query.orderBy("inv_date", "desc").select("*");
