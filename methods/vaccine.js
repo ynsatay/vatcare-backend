@@ -52,6 +52,7 @@ function methodVaccine(app) {
                     'vp.notes',
                     'vp.animal_id',
                     'm.name as vaccine_name',
+                    'vp.is_applied',
                     'vp.m_id'
                 )
                 .where({ 'vp.animal_id': animalId, 'vp.is_applied': false, 'vp.off_id': off_id })
@@ -78,6 +79,7 @@ function methodVaccine(app) {
                     'vp.planned_date',
                     'vp.applied_on',
                     'vp.notes',
+                    'vp.is_applied',
                     'vp.animal_id',
                     'm.name as vaccine_name',
                     'pp.pa_id'
