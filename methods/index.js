@@ -99,6 +99,16 @@ function methods(app) {
         }
     });
 
+    app.get('/api/public_hr_offices', async (req, res) => {
+        try {
+            const offices = await connection('hr_offices').select('id', 'clinic_id', 'name');
+            return res.status(200).json(offices);
+        } catch (error) {
+            console.error('HR Offices API error:', error);
+            return res.status(500).json({ error: 'Sunucu hatası oluştu' });
+        }
+    });
+
     //Kayıt İşlemleri--şimdilik kullanılmıyor.
     app.post('/api/register', (req, res) => {
         try {
