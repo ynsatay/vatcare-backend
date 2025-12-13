@@ -322,7 +322,7 @@ function methods(app) {
                         'f.title',
                         'f.icon',
                         'f.color',
-                        connection.raw("DATE_FORMAT(f.feed_date, '%Y-%m-%d %H:%i:%s') as created_at")
+                        connection.raw("CONVERT_TZ(f.feed_date, @@session.time_zone, '+00:00') as created_at")
                     )
                     .where('f.off_id', userOffId)
                     .whereRaw('DATE(f.feed_date) = CURDATE()')
@@ -339,7 +339,7 @@ function methods(app) {
                         'f.title',
                         'f.icon',
                         'f.color',
-                        connection.raw("DATE_FORMAT(f.feed_date, '%Y-%m-%d %H:%i:%s') as created_at")
+                        connection.raw("f.feed_date as created_at")
                     )
                     .where('f.off_id', userOffId)
                     .where('f.reference_table', 'patient_revenues')
@@ -360,7 +360,7 @@ function methods(app) {
                         'f.title',
                         'f.icon',
                         'f.color',
-                        connection.raw("DATE_FORMAT(f.feed_date, '%Y-%m-%d %H:%i:%s') as created_at")
+                        connection.raw("f.feed_date as created_at")
                     )
                     .where('f.off_id', userOffId)
                     .andWhere('f.reference_table', 'patient_process')
@@ -385,7 +385,7 @@ function methods(app) {
                         'f.title',
                         'f.icon',
                         'f.color',
-                        connection.raw("DATE_FORMAT(f.feed_date, '%Y-%m-%d %H:%i:%s') as created_at")
+                        connection.raw("f.feed_date as created_at")
                     )
                     .where('f.off_id', userOffId)
                     .andWhere('f.reference_table', 'patient_process')
@@ -411,7 +411,7 @@ function methods(app) {
                         'f.title',
                         'f.icon',
                         'f.color',
-                        connection.raw("DATE_FORMAT(f.feed_date, '%Y-%m-%d %H:%i:%s') as created_at")
+                        connection.raw("f.feed_date as created_at")
                     )
                     .where('f.off_id', userOffId)
                     .andWhere('f.reference_table', 'patient_process')
@@ -431,7 +431,7 @@ function methods(app) {
                         'f.title',
                         'f.icon',
                         'f.color',
-                        connection.raw("DATE_FORMAT(f.feed_date, '%Y-%m-%d %H:%i:%s') as created_at")
+                        connection.raw("f.feed_date as created_at")
                     )
                     .where('f.off_id', userOffId)
                     .where('f.reference_table', 'appointment_process')
