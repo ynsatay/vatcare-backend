@@ -319,7 +319,7 @@ function methods(app) {
       'f.title',
       'f.icon',
       'f.color',
-      connection.raw("DATE_FORMAT(f.feed_date, '%Y-%m-%d %H:%i:%s') as created_at")
+      'f.feed_date as created_at'
     ];
 
     let query = connection('feeds as f')
