@@ -319,7 +319,7 @@ function methods(app) {
                 'f.title',
                 'f.icon',
                 'f.color',
-                connection.raw("DATE_FORMAT(f.feed_date, '%Y-%m-%d %T') as created_at")
+                connection.raw("CAST(DATE_FORMAT(f.feed_date, '%Y-%m-%d %H:%i:%s') AS CHAR) as created_at")
             ];
 
             let query = connection('feeds as f')
@@ -370,27 +370,9 @@ function methods(app) {
                         this.whereNull('m.category').orWhere('m.category', '!=', 5);
                     });
             }
+
             const feeds = await query;
-            const formattedFeeds = feeds.map(feed => {
-                if (feed.created_at) {
-                    const date = new Date(feed.created_at);
-                    const year = date.getFullYear();
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const day = String(date.getDate()).padStart(2, '0');
-                    const hours = String(date.getHours()).padStart(2, '0');
-                    const minutes = String(date.getMinutes()).padStart(2, '0');
-                    const seconds = String(date.getSeconds()).padStart(2, '0');
-
-                    return {
-                        ...feed,
-                        created_at: `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
-                    };
-                }
-                return feed;
-            });
-
-            // Formatlanmış veriyi döndür
-            return res.json(formattedFeeds);
+            return res.json(feeds);
 
         } catch (error) {
             console.error('Feeds çekilirken hata:', error);
