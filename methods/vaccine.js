@@ -72,13 +72,15 @@ function methodVaccine(app) {
         try {
             const applied = await connection('vaccination_plan as vp')
                 .join('materials as m', 'vp.m_id', 'm.id')
+                .leftJoin('patient_process as pp', 'vp.pp_id', 'pp.id')
                 .select(
                     'vp.id',
                     'vp.planned_date',
                     'vp.applied_on',
                     'vp.notes',
                     'vp.animal_id',
-                    'm.name as vaccine_name'
+                    'm.name as vaccine_name',
+                    'pp.pa_id'
                 )
                 .where({ 'vp.animal_id': animalId, 'vp.is_applied': true, 'vp.off_id': off_id })
                 .orderBy('vp.applied_on', 'desc');
