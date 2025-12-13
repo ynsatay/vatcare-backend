@@ -19,7 +19,10 @@ function methodVaccine(app) {
                 .join('users_animals as ua', 'vp.animal_id', 'ua.id')
                 .select(
                     'vp.id',
-                    connection.raw(`CASE WHEN vp.is_applied = 0 THEN vp.planned_date ELSE vp.applied_on END as date`),
+                    connection.raw(`CASE 
+                                      WHEN vp.is_applied IN (0, 2) THEN vp.planned_date
+                                      WHEN vp.is_applied = 1 THEN vp.applied_on
+                                    END as date`),
                     'vp.is_applied',
                     'vp.animal_id',
                     'm.name as vaccine_name',
@@ -152,7 +155,7 @@ function methodVaccine(app) {
                 return res.status(404).json({ error: 'Plan kaydı bulunamadı' });
             }
 
-            if (plan.is_applied) {
+            if (plan.is_applied == 1) {
                 return res.status(400).json({ error: 'Uygulanan plan güncellenemez' });
             }
 
