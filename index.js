@@ -19,6 +19,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import bodyParser from 'body-parser';
 import './services/mailReminder.js';
+import './methods/utils/vaccineControl.js';
 
 //dotenv.config({ path: path.resolve('../.env') }); // gerekirse './.env' de olabilir
 dotenv.config();
