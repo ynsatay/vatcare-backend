@@ -17,6 +17,9 @@ exports.up = function(knex) {
     table.integer('nationality').nullable();
     table.integer('pass_number').nullable();
     table.boolean('active').defaultTo(true);
+    table.integer('language').notNullable().defaultTo(0); 
+    table.boolean('dark_mode').notNullable().defaultTo(false); // Koyu mod durumu
+    table.integer('theme').notNullable().defaultTo(1); // Tema varsayılan 1
     table.timestamps(true, true);
   });
 };

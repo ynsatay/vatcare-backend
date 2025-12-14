@@ -26,7 +26,9 @@ exports.seed = async function(knex) {
         active: true,            // boolean alana true
         created_at: new Date(),
         updated_at: new Date(),
-        language: 1  
+        language: 0,
+        dark_mode: false,
+        theme: 1  
       }
     ]);
   }
