@@ -87,7 +87,8 @@ function methodVaccine(app) {
                     'm.name as vaccine_name',
                     'pp.pa_id'
                 )
-                .where({ 'vp.animal_id': animalId, 'vp.is_applied': true, 'vp.off_id': off_id })
+                .where({ 'vp.animal_id': animalId, 'vp.off_id': off_id })
+                .whereIn('vp.is_applied', [1, 2])
                 .orderBy('vp.applied_on', 'desc');
 
             res.json(applied);
