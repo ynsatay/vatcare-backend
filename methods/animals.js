@@ -87,6 +87,9 @@ function methodsanimals(app) {
         const id = req.params.id;
         const { animal_id, user_id, animal_species_id, birthdate, deathdate, animalidentnumber, picture, isdeath, active, animalname } = req.body;
 
+        const normalizedBirthdate = birthdate === "" ? null : birthdate;
+        const normalizedDeathdate = deathdate === "" ? null : deathdate;
+
         try {
             await connection('users_animals')
                 .where({ id: id })
@@ -94,8 +97,8 @@ function methodsanimals(app) {
                     user_id: user_id,
                     animal_id: animal_id,
                     animal_species_id: animal_species_id,
-                    birthdate: birthdate,
-                    deathdate: deathdate === "" ? null : deathdate,
+                    birthdate: normalizedBirthdate,
+                    deathdate: normalizedDeathdate,
                     animalidentnumber: animalidentnumber,
                     picture: picture,
                     isdeath: isdeath === "" ? false : isdeath,
@@ -132,6 +135,7 @@ function methodsanimals(app) {
             animal_species_id = Number(animal_species_id);
 
             // Tarih boşsa null yap
+            birthdate = birthdate === "" ? null : birthdate;
             deathdate = deathdate || null;
             picture = picture || null;
 
