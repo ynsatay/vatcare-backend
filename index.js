@@ -20,12 +20,16 @@ import path from 'path';
 import bodyParser from 'body-parser';
 import './services/mailReminder.js';
 import './methods/utils/vaccineControl.js';
+import { apiLimiter, loginLimiter } from './methods/Middleware/rateLimiter.js';
 
 //dotenv.config({ path: path.resolve('../.env') }); // gerekirse './.env' de olabilir
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT;
+
+// If the app runs behind a proxy/load balancer, this enables correct client IP detection
+app.set('trust proxy', Number(process.env.TRUST_PROXY ?? 1));
 
 app.use(cors({ origin: "*"}));
 
@@ -35,6 +39,10 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 // JSON ve URL-encoded veri ayrıştırma middleware'leri
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Rate limiting
+app.use('/api/login', loginLimiter);
+app.use('/api', apiLimiter);
 
 methods(app); 
 methodsanimals(app);

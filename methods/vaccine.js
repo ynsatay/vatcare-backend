@@ -147,7 +147,7 @@ function methodVaccine(app) {
     app.put('/api/vaccine/plan/:id', authenticateToken, blockDemoUser, async (req, res) => {
         const off_id = req.user.off_id;
         const { id } = req.params;
-        const { planned_date, notes } = req.body;
+        const { planned_date, notes, is_applied } = req.body;
 
         try {
             const plan = await connection('vaccination_plan').where({ id, off_id }).first();
@@ -160,12 +160,48 @@ function methodVaccine(app) {
                 return res.status(400).json({ error: 'Uygulanan plan güncellenemez' });
             }
 
+            if (typeof is_applied !== 'undefined') {
+                const normalizedIsApplied = Number(is_applied);
+                // 1 (applied) state should be set only via /apply endpoint
+                if (normalizedIsApplied === 1) {
+                    return res.status(400).json({ error: 'Uygulandı durumu bu ekrandan değiştirilemez' });
+                }
+                // allow only known planned states (0,2)
+                if (![0, 2].includes(normalizedIsApplied)) {
+                    return res.status(400).json({ error: 'Geçersiz is_applied değeri' });
+                }
+            }
+
+            const updateData = {};
+            if (typeof planned_date !== 'undefined') updateData.planned_date = planned_date;
+            if (typeof notes !== 'undefined') updateData.notes = notes;
+            if (typeof is_applied !== 'undefined') {
+                const normalizedIsApplied = Number(is_applied);
+
+                // Eğer 2 geldiyse ve planned_date şimdiki zamandan sonrasına güncelleniyorsa durum 0'a çekilsin
+                if (normalizedIsApplied === 2 && typeof planned_date !== 'undefined') {
+                    const plannedDateObj = new Date(planned_date);
+                    if (Number.isNaN(plannedDateObj.getTime())) {
+                        return res.status(400).json({ error: 'Geçersiz planned_date değeri' });
+                    }
+
+                    if (plannedDateObj.getTime() > Date.now()) {
+                        updateData.is_applied = 0;
+                    } else {
+                        updateData.is_applied = 2;
+                    }
+                } else {
+                    updateData.is_applied = normalizedIsApplied;
+                }
+            }
+
+            if (Object.keys(updateData).length === 0) {
+                return res.status(400).json({ error: 'Güncellenecek alan bulunamadı' });
+            }
+
             await connection('vaccination_plan')
                 .where({ id, off_id })
-                .update({
-                    planned_date,
-                    notes
-                });
+                .update(updateData);
 
             res.json({ message: 'Plan kaydı güncellendi' });
         } catch (err) {
