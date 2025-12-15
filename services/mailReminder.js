@@ -3,7 +3,7 @@ import db from '../knex/connection.js';
 import { sendMail } from '../methods/utils/mailer.js';
 
 cron.schedule('00 8 * * *', async () => {
-  console.log('Cron job başladı - Mail gönderiliyor');
+ // console.log('Cron job başladı - Mail gönderiliyor');
 
   try {
     const tomorrow = new Date();
@@ -58,7 +58,7 @@ cron.schedule('00 8 * * *', async () => {
       });
     }
 
-    console.log(`${reminders.length} adet hatırlatma maili gönderildi.`);
+  //  console.log(`${reminders.length} adet hatırlatma maili gönderildi.`);
   } catch (err) {
     console.error('Cron işinde hata:', err);
   }

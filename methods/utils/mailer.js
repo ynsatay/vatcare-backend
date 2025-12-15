@@ -17,7 +17,7 @@ export async function sendMail({ to, subject, text, html }) {
       text,
       html,  // Burada html parametresi eklendi
     });
-    console.log(`Mail gönderildi: ${info.response} - Alıcı: ${to}`);
+    //console.log(`Mail gönderildi: ${info.response} - Alıcı: ${to}`);
     return info;
   } catch (error) {
     console.error(`Mail gönderme hatası (alıcı: ${to}):`, error);

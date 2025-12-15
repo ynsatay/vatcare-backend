@@ -30,10 +30,8 @@ function methodsoffices(app) {
       .del()
       .then((deletedCount) => {
         if (deletedCount === 0) {
-          console.log(`ID'si ${id} olan ofis bulunamadı.`);
           return res.status(404).json({ error: `ID'si ${id} olan ofis bulunamadı.`, status: 'error' });
         }
-        console.log(`ID'si ${id} olan ofis başarıyla silindi.`);
         return res.status(200).json({ status: 'success', message: `ID'si ${id} olan ofis başarıyla silindi.` });
       })
       .catch((err) => {

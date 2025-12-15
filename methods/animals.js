@@ -9,7 +9,6 @@ function methodsanimals(app) {
 
         connection.select().from('animals').then((animal) => {
             if (animal.length === 0) {
-                console.log('Veri Bulunamadı');
                 return res.status(400).json({ error: 'Veri Bulunamadı', status: 'error' });
             }
 
@@ -23,7 +22,6 @@ function methodsanimals(app) {
         const { animal_id } = req.query;
         connection.select().from('animals_species').where('animal_id', animal_id).then((animalspec) => {
             if (animalspec.length === 0) {
-                console.log('Veri Bulunamadı');
                 return res.status(400).json({ error: 'Veri Bulunamadı', status: 'error' });
             }
 
@@ -74,10 +72,8 @@ function methodsanimals(app) {
             .del()
             .then((deletedCount) => {
                 if (deletedCount === 0) {
-                    console.log(`ID'si ${id} olan hayvan bulunamadı.`);
                     return res.status(404).json({ error: `ID'si ${id} olan hayvan bulunamadı.`, status: 'error' });
                 }
-                console.log(`ID'si ${id} olan hayvan başarıyla silindi.`);
                 return res.status(200).json({ status: 'success', message: `ID'si ${id} olan hayvan başarıyla silindi.` });
             })
             .catch((err) => {
@@ -169,8 +165,6 @@ function methodsanimals(app) {
                 animalname,
                 off_id: offId
             });
-
-            console.log("Hayvan adı veritabanına eklendi:", animalname);
 
             return res.status(200).json({
                 status: 'success',

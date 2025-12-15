@@ -265,7 +265,6 @@ function methodVaccine(app) {
 
             res.json(plan);
         } catch (error) {
-            console.log(error);
             res.status(500).json({ error: 'Aşı planı getirilirken hata oluştu.' });
         }
     });

@@ -391,9 +391,6 @@ function methods(app) {
             }
 
             const feeds = await query;
-
-            console.log('Raw feeds:', feeds); // Debug için
-
             return res.json(feeds);
 
         } catch (error) {
