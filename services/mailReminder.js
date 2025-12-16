@@ -2,8 +2,8 @@ import cron from 'node-cron';
 import db from '../knex/connection.js';
 import { sendMail } from '../methods/utils/mailer.js';
 
-cron.schedule('00 8 * * *', async () => {
- // console.log('Cron job başladı - Mail gönderiliyor');
+cron.schedule('0 8 * * *', async () => {
+  //console.log('Cron job başladı - Mail gönderiliyor');
 
   try {
     const tomorrow = new Date();
