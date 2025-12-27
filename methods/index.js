@@ -463,7 +463,7 @@ function methods(app) {
 
         try {
             await sendMail({
-                to: "ynsmratay@gmail.com",
+                to: "ynsmratay@gmail.com,mehmetcan3742@gmail.com",
                 subject: 'VetCare | Yeni Demo Talebi',
                 html: `
           <div style="font-family:'Segoe UI',Arial,sans-serif;background:#f4f5fb;padding:24px;">
@@ -528,7 +528,7 @@ Otomatik demo: kullanıcı adı=test şifre=123
 
         try {
             await sendMail({
-                to: "ynsmratay@gmail.com",
+                to: "ynsmratay@gmail.com,mehmetcan3742@gmail.com",
                 subject: 'VetCare | Şifre Sıfırlama Talebi',
                 html: `
           <div style="font-family:'Segoe UI',Arial,sans-serif;background:#f4f5fb;padding:24px;">
