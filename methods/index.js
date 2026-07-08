@@ -247,19 +247,24 @@ function methods(app) {
             const updateData = {
                 name,
                 surname,
-                password: password || null,
                 phone,
                 email,
                 sex,
                 birthdate: birthdate || null,
                 identity: identity ? Number(identity) : null,
-                pass_number,
+                pass_number: pass_number || null,
                 address,
                 nationality,
                 language,
                 dark_mode,
                 theme
             };
+
+
+            // Şifre değiştirildiyse güncelle
+            if (password && password.trim() !== "") {
+                updateData.password = password;
+            }
 
 
             console.log("DATABASE UPDATE DATA:", updateData);
