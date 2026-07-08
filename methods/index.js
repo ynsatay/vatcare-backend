@@ -249,12 +249,12 @@ function methods(app) {
                     return res.status(200).json({ status: 'success', message: 'Profil başarıyla güncellendi' });
                 })
                 .catch((error) => {
-                    console.error('Profil güncellenirken bir hata oluştu:', error);
+                    console.error('Profil güncellenirken bir hata oluştu test2:', error);
                     return res.status(500).json({ error: 'Sunucu hatası', status: 'error' });
                 });
 
         } catch (error) {
-            console.error('Profil güncellenirken bir hata oluştu :', error);
+            console.error('Profil güncellenirken bir hata oluştu test:', error);
             return res.status(500).json({ error: 'Sunucu hatası', status: 'error' });
         }
     });
