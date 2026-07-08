@@ -211,14 +211,38 @@ function methods(app) {
     //Profili günceller
     app.post('/api/update-profile', authenticateToken, blockDemoUser, upload.single('picture'), (req, res) => {
         try {
-            const { userId, name, surname, password, phone, email, sex, birthdate, identity, pass_number, address, nationality, language, dark_mode, theme } = req.body;
 
-            if (req.file) {
-                const allowedTypes = ['image/jpeg', 'image/png'];
-                if (!allowedTypes.includes(req.file.mimetype)) {
-                    return res.status(400).json({ error: 'Sadece JPG veya PNG formatında resim dosyaları yüklenebilir', status: 'error' });
-                }
-            }
+            console.log("========== UPDATE PROFILE ==========");
+            console.log("BODY:", req.body);
+            console.log("FILE:", req.file ? {
+                name: req.file.originalname,
+                type: req.file.mimetype,
+                size: req.file.size
+            } : "YOK");
+
+
+            const {
+                userId,
+                name,
+                surname,
+                password,
+                phone,
+                email,
+                sex,
+                birthdate,
+                identity,
+                pass_number,
+                address,
+                nationality,
+                language,
+                dark_mode,
+                theme
+            } = req.body;
+
+
+            console.log("GELEN IDENTITY:", identity);
+            console.log("IDENTITY TYPE:", typeof identity);
+
 
             const updateData = {
                 name,
@@ -237,25 +261,53 @@ function methods(app) {
                 theme
             };
 
+
+            console.log("DATABASE UPDATE DATA:", updateData);
+
+
             if (req.file) {
                 const base64Image = req.file.buffer.toString('base64');
                 updateData.picture = base64Image;
             }
 
+
             connection('users')
                 .where('id', userId)
                 .update(updateData)
                 .then(() => {
-                    return res.status(200).json({ status: 'success', message: 'Profil başarıyla güncellendi' });
+
+                    console.log("PROFILE UPDATE SUCCESS");
+
+                    return res.status(200).json({
+                        status: 'success',
+                        message: 'Profil başarıyla güncellendi'
+                    });
+
                 })
                 .catch((error) => {
-                    console.error('Profil güncellenirken bir hata oluştu test2:', error);
-                    return res.status(500).json({ error: 'Sunucu hatası test2', status: 'error' });
+
+                    console.error("========== MYSQL ERROR ==========");
+                    console.error(error);
+
+                    return res.status(500).json({
+                        status: "error",
+                        message: error.sqlMessage || error.message,
+                        code: error.code || null
+                    });
+
                 });
 
+
         } catch (error) {
-            console.error('Profil güncellenirken bir hata oluştu test:', error);
-            return res.status(500).json({ error: 'Sunucu hatası test', status: 'error' });
+
+            console.error("========== SERVER ERROR ==========");
+            console.error(error);
+
+            return res.status(500).json({
+                status: "error",
+                message: error.message
+            });
+
         }
     });
 
