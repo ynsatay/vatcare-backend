@@ -254,7 +254,7 @@ function methods(app) {
                 });
 
         } catch (error) {
-            console.error('Profil güncellenirken bir hata oluştu:', error);
+            console.error('Profil güncellenirken bir hata oluştu :', error);
             return res.status(500).json({ error: 'Sunucu hatası', status: 'error' });
         }
     });
